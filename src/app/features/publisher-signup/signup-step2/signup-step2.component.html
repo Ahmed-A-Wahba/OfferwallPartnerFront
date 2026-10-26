@@ -1,0 +1,225 @@
+<div class="flex min-h-screen bg-[#F9F9FF]">
+  <!-- ───────── Left Side: Form (45%) ───────── -->
+  <div [@slideIn] class="w-full lg:w-[45%] min-h-screen flex flex-col justify-between p-8 md:p-16 bg-white border-r border-[#CCC3D7]/30">
+    <div class="flex flex-col gap-10">
+      <!-- Brand & Back -->
+      <div class="flex flex-col gap-8">
+        <span class="font-sora font-extrabold text-[28px] tracking-tight text-purple-700">NEXUS</span>
+        <a routerLink="/signup/step1" class="flex items-center gap-1 cursor-pointer group text-gray-700 hover:text-black">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M9.5 6H2.5M2.5 6L5.5 3M2.5 6L5.5 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="font-inter font-medium text-sm group-hover:underline">Back</span>
+        </a>
+      </div>
+
+      <!-- Step Progress -->
+      <div class="flex flex-col gap-3 pt-2">
+        <span class="font-inter font-semibold text-xs tracking-[0.05em] uppercase text-[#151C27]">
+          STEP 2 OF 4 — STORE DETAILS
+        </span>
+        <div class="w-full h-2 rounded-full bg-[#DCE2F3]">
+          <div class="h-full rounded-full bg-purple-700 transition-all duration-500" style="width: 50%;"></div>
+        </div>
+      </div>
+
+      <!-- Header Text -->
+      <div class="flex flex-col gap-2">
+        <h1 class="font-sora font-bold text-[32px] leading-[40px] text-[#151C27]">Store Details</h1>
+        <p class="font-inter text-base leading-6 text-gray-500">Tell us about your application or website</p>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+        <!-- Website URL -->
+        <div class="flex flex-col gap-1">
+          <label class="font-inter font-bold text-sm text-[#151C27]">Website URL</label>
+          <input
+            id="websiteUrl"
+            type="url"
+            formControlName="websiteUrl"
+            placeholder="https://yourstore.com"
+            class="w-full border border-[#CCC3D7] rounded-lg px-4 py-3 font-inter text-sm outline-none transition-all focus:ring-2 focus:ring-purple-700/20 focus:border-purple-700 placeholder-gray-400"
+            [class.!border-red-500]="form.get('websiteUrl')?.invalid && form.get('websiteUrl')?.touched"
+          />
+          @if (form.get('websiteUrl')?.invalid && form.get('websiteUrl')?.touched) {
+            <span class="text-red-500 text-sm mt-1">Valid website URL is required</span>
+          }
+        </div>
+
+        <!-- Store Country -->
+        <div class="flex flex-col gap-1">
+          <label class="font-inter font-bold text-sm text-[#151C27]">Store Country</label>
+          <div class="relative">
+            <select
+              id="countryCode"
+              formControlName="countryCode"
+              class="w-full border border-[#CCC3D7] rounded-lg px-4 py-3 font-inter text-sm outline-none transition-all focus:ring-2 focus:ring-purple-700/20 focus:border-purple-700 appearance-none cursor-pointer pr-10 bg-white"
+              [class.!border-red-500]="form.get('countryCode')?.invalid && form.get('countryCode')?.touched"
+            >
+              <option value="" disabled>Select your country</option>
+              @for (country of countries; track country.value) {
+                <option [value]="country.value">{{ country.label }}</option>
+              }
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+              </svg>
+            </div>
+          </div>
+          @if (form.get('countryCode')?.invalid && form.get('countryCode')?.touched) {
+            <span class="text-red-500 text-sm mt-1">Please select a country</span>
+          }
+        </div>
+
+        <!-- Monthly Active Users -->
+        <div class="flex flex-col gap-1">
+          <label class="font-inter font-bold text-sm text-[#151C27]">Monthly Active Users</label>
+          <input
+            id="monthlyActiveUsers"
+            type="number"
+            formControlName="monthlyActiveUsers"
+            placeholder="e.g. 50000"
+            class="w-full border border-[#CCC3D7] rounded-lg px-4 py-3 font-inter text-sm outline-none transition-all focus:ring-2 focus:ring-purple-700/20 focus:border-purple-700 placeholder-gray-400"
+            [class.!border-red-500]="form.get('monthlyActiveUsers')?.invalid && form.get('monthlyActiveUsers')?.touched"
+          />
+          @if (form.get('monthlyActiveUsers')?.hasError('required') && form.get('monthlyActiveUsers')?.touched) {
+            <span class="text-red-500 text-sm mt-1">Monthly active users is required</span>
+          }
+          @if (form.get('monthlyActiveUsers')?.hasError('min') && form.get('monthlyActiveUsers')?.touched) {
+            <span class="text-red-500 text-sm mt-1">Value must be at least 1</span>
+          }
+        </div>
+
+        <!-- Store Category -->
+        <div class="flex flex-col gap-1">
+          <label class="font-inter font-bold text-sm text-[#151C27]">Store Category</label>
+          <div class="relative">
+            <select
+              id="storeCategory"
+              formControlName="storeCategory"
+              class="w-full border border-[#CCC3D7] rounded-lg px-4 py-3 font-inter text-sm outline-none transition-all focus:ring-2 focus:ring-purple-700/20 focus:border-purple-700 appearance-none cursor-pointer pr-10 bg-white"
+              [class.!border-red-500]="form.get('storeCategory')?.invalid && form.get('storeCategory')?.touched"
+            >
+              <option value="" disabled>Select a category</option>
+              @for (cat of categories; track cat.value) {
+                <option [value]="cat.value">{{ cat.label }}</option>
+              }
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+              </svg>
+            </div>
+          </div>
+          @if (form.get('storeCategory')?.invalid && form.get('storeCategory')?.touched) {
+            <span class="text-red-500 text-sm mt-1">Please select a store category</span>
+          }
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          id="step2Submit"
+          type="submit"
+          class="flex justify-center items-center gap-2 w-full bg-purple-700 text-white rounded-lg py-3 font-semibold hover:bg-purple-800 transition shadow-[0_4px_6px_-4px_rgba(109,40,217,0.2),0_10px_15px_-3px_rgba(109,40,217,0.2)] cursor-pointer"
+        >
+          Continue
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2.5 6H9.5M9.5 6L6.5 3M9.5 6L6.5 9" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="pt-12 flex justify-center items-center gap-2 text-gray-500">
+      <svg width="12" height="14" viewBox="0 0 12 14" fill="none">
+        <path d="M10 5H2C1.44772 5 1 5.44772 1 6V12C1 12.5523 1.44772 13 2 13H10C10.5523 13 11 12.5523 11 12V6C11 5.44772 10.5523 5 10 5Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M3 5V3C3 1.34315 4.34315 0 6 0C7.65685 0 9 1.34315 9 3V5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="font-inter font-medium text-xs">Protected by industry-standard encryption</span>
+    </div>
+  </div>
+
+  <!-- ───────── Right Side: Branding (55%) ───────── -->
+  <div class="relative flex-1 hidden lg:flex flex-col justify-between overflow-hidden p-16 bg-[#0F0F1A]">
+    <div class="absolute rounded-full pointer-events-none w-[384px] h-[384px] -top-24 -right-24 bg-purple-700/10 blur-[60px]"></div>
+    <div class="absolute rounded-full pointer-events-none w-[384px] h-[384px] -bottom-24 -left-24 bg-blue-600/10 blur-[60px]"></div>
+
+    <div class="flex justify-between items-center z-10">
+      <span class="font-sora font-extrabold text-[28px] text-white tracking-tight">NEXUS</span>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
+        <div class="w-2 h-2 rounded-full bg-green-500"></div>
+        <span class="font-inter font-bold text-[10px] tracking-[0.1em] text-green-500 uppercase">ALL SYSTEMS OPERATIONAL</span>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-6 z-10">
+      <h2 class="font-sora font-bold text-[48px] leading-[52.8px] text-white">
+        Scale with your<br><span class="text-[#D3BBFF]">audience</span>
+      </h2>
+      <p class="font-inter text-base leading-[26px] text-[#DCE2F3] opacity-80 max-w-lg">
+        Our smart routing ensures your users only see offers that match their region and interests.
+      </p>
+
+      <div class="flex flex-col gap-4 pt-6 max-w-md">
+        <!-- Feature 1 -->
+        <div class="flex items-start gap-5 p-5 rounded-xl bg-[#1A1A2E] border border-white/5">
+          <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-[#5300B7]/25 flex-shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D3BBFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="font-inter font-bold text-sm text-white">MENA-first coverage</span>
+            <span class="font-inter text-xs leading-[19.5px] text-gray-400">
+              Offers optimized for Egypt, Saudi Arabia, UAE & more.
+            </span>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="flex items-start gap-5 p-5 rounded-xl bg-[#1A1A2E] border border-white/5">
+          <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-[#5300B7]/25 flex-shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D3BBFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            </svg>
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="font-inter font-bold text-sm text-white">Smart offer matching</span>
+            <span class="font-inter text-xs leading-[19.5px] text-gray-400">
+              Automatically serve the highest-converting offers.
+            </span>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="flex items-start gap-5 p-5 rounded-xl bg-[#1A1A2E] border border-white/5">
+          <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-[#5300B7]/25 flex-shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D3BBFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="font-inter font-bold text-sm text-white">Highest payouts</span>
+            <span class="font-inter text-xs leading-[19.5px] text-gray-400">
+              Optimized commissions for every store category.
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Text -->
+    <div class="mt-8 z-10 opacity-50">
+      <span class="font-inter font-semibold text-xs tracking-wider text-gray-400 uppercase">
+        TRUSTED BY LEADING E-COMMERCE PLATFORMS ACROSS THE REGION
+      </span>
+    </div>
+  </div>
+</div>

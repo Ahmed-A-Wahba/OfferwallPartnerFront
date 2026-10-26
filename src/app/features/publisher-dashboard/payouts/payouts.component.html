@@ -1,0 +1,259 @@
+<div class="flex min-h-screen bg-[#F9F9FF] font-inter">
+
+  <!-- ───────── 1. SIDEBAR NAVIGATION ───────── -->
+  <app-publisher-sidebar></app-publisher-sidebar>
+
+  <!-- ───────── 2. MAIN WORKSPACE CONTENT ───────── -->
+  <div class="flex-1 pl-64 flex flex-col min-h-screen">
+
+    <!-- Header Navigation Bar -->
+    <app-publisher-header title="Payouts"></app-publisher-header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-8 space-y-6 max-w-7xl mx-auto w-full">
+
+      <!-- Loader State -->
+      <div *ngIf="isLoading" class="w-full flex items-center justify-center py-20">
+        <div class="flex flex-col items-center gap-3">
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#7C3AED]"></div>
+          <span class="text-xs font-semibold text-[#64748B]">Loading Payout Details...</span>
+        </div>
+      </div>
+
+      <!-- Error Banner -->
+      <div *ngIf="errorMessage" class="w-full p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm flex items-center gap-3">
+        <svg class="w-5 h-5 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <div *ngIf="!isLoading" class="space-y-6">
+
+        <!-- ───────── SECTION 1: CURRENT PAYOUT PERIOD CARD ───────── -->
+        <section class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-6">
+          <!-- Top Row -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="font-sora font-bold text-lg text-[#151C27]">Current Payout Period</h2>
+              <p class="text-xs text-[#64748B] mt-0.5">Your active billing window</p>
+            </div>
+            <div>
+              <span class="bg-purple-700 text-white text-sm font-semibold px-3.5 py-1.5 rounded-full inline-block shadow-sm">
+                {{ (currentPeriod ? getDaysRemaining(currentPeriod.periodEnd) : daysRemaining) }} days remaining
+              </span>
+            </div>
+          </div>
+
+          <!-- Three Equal-Width Columns -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 border-t border-gray-100">
+            <!-- Col 1: Period Start -->
+            <div class="flex flex-col">
+              <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">PERIOD START</span>
+              <span class="text-xl font-bold text-gray-900 mt-1">
+                {{ currentPeriod ? formatDate(currentPeriod.periodStart) : (periodStart | date:'MMM dd, yyyy':'UTC') }}
+              </span>
+            </div>
+
+            <!-- Col 2: Period End -->
+            <div class="flex flex-col">
+              <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">PERIOD END</span>
+              <span class="text-xl font-bold text-gray-900 mt-1">
+                {{ currentPeriod ? formatDate(currentPeriod.periodEnd) : (periodEnd | date:'MMM dd, yyyy':'UTC') }}
+              </span>
+            </div>
+
+            <!-- Col 3: Payout Date (NET 30) -->
+            <div class="flex flex-col">
+              <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">PAYOUT DATE (NET 30)</span>
+              <span class="text-purple-700 font-bold text-xl mt-1">
+                {{ currentPeriod ? getPayoutDate(currentPeriod.periodEnd) : (payoutDate | date:'MMM dd, yyyy':'UTC') }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Progress Bar Section -->
+          <div class="space-y-2 pt-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">PERIOD PROGRESS</span>
+              <span class="text-purple-700 font-bold text-sm">
+                {{ currentPeriod ? getPeriodProgress(currentPeriod.periodStart, currentPeriod.periodEnd) : periodProgress }}%
+              </span>
+            </div>
+            <!-- Progress Bar Track & Fill -->
+            <div class="bg-gray-200 rounded-full h-2.5 w-full overflow-hidden">
+              <div class="bg-purple-700 rounded-full h-2.5 transition-all duration-500"
+                   [style.width.%]="currentPeriod ? getPeriodProgress(currentPeriod.periodStart, currentPeriod.periodEnd) : periodProgress"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ───────── SECTION 2: MINIMUM PAYOUT THRESHOLD INFO BOX ───────── -->
+        <section class="bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-5 flex items-start gap-4 shadow-sm">
+          <div class="text-blue-500 shrink-0 mt-0.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="space-y-1">
+            <h3 class="font-bold text-blue-900 text-sm">Minimum Payout Threshold &mdash; $100</h3>
+            <p class="text-xs text-gray-600 leading-relaxed">
+              Payouts are only processed once your total balance reaches $100 or more. If your balance for a given period is not above this threshold, it will not be paid out that cycle &mdash; instead, it rolls over and combines with earnings from upcoming periods until the $100 minimum is met.
+            </p>
+          </div>
+        </section>
+
+        <!-- ───────── SECTION 3: PAYOUT HISTORY TABLE ───────── -->
+        <section class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+          <!-- Card Header Row -->
+          <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="font-sora font-bold text-lg text-gray-900">Payout History</h2>
+              <p class="text-xs text-gray-500 mt-0.5">All completed and pending payout cycles</p>
+            </div>
+
+            <!-- Export CSV Button -->
+            <button
+              type="button"
+              (click)="exportCSV()"
+              class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm transition-all self-start sm:self-auto">
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+              <span>Export CSV</span>
+            </button>
+          </div>
+
+          <!-- Table Container -->
+          <div class="overflow-x-auto min-h-[240px]">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-gray-200 bg-gray-50/50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th class="p-4 pl-6">CYCLE PERIOD</th>
+                  <th class="p-4">PAYOUT DATE</th>
+                  <th class="p-4">REDEMPTIONS</th>
+                  <th class="p-4">AMOUNT</th>
+                  <th class="p-4 pr-6">STATUS</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 text-sm text-gray-900">
+                <tr *ngFor="let item of items; let i = index" class="hover:bg-gray-50/60 transition-colors">
+
+                  <!-- CYCLE PERIOD -->
+                  <td class="p-4 pl-6 font-semibold text-xs text-gray-900">
+                    {{ formatDate(item.periodStart) }} &ndash; {{ formatDate(item.periodEnd) }}
+                  </td>
+
+                  <!-- PAYOUT DATE -->
+                  <td class="p-4 text-xs text-gray-600">
+                    {{ item.paidAt ? formatDate(item.paidAt) : '&ndash;' }}
+                  </td>
+
+                  <!-- REDEMPTIONS -->
+                  <td class="p-4">
+                    <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-2.5 py-1 rounded-full inline-block">
+                      {{ item.redemptionCount }}
+                    </span>
+                  </td>
+
+                  <!-- AMOUNT -->
+                  <td class="p-4 font-bold text-sm text-gray-900">
+                    {{ item.amount | currency:'USD':'symbol':'1.2-2' }}
+                  </td>
+
+                  <!-- STATUS -->
+                  <td class="p-4 pr-6">
+                    <!-- Status: Paid -->
+                    <span *ngIf="item.status === 'Paid'"
+                          class="bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1 w-fit">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <span>paid</span>
+                    </span>
+
+                    <!-- Status: Pending / Ongoing (First/current row) -->
+                    <span *ngIf="item.status === 'Pending' && i === 0"
+                          class="bg-amber-100 text-amber-700 text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1 w-fit">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      <span>ongoing</span>
+                    </span>
+
+                    <!-- Status: Pending / Estimated (Past rows) or Estimated -->
+                    <span *ngIf="(item.status === 'Pending' && i > 0) || item.status === 'Estimated'"
+                          class="bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1 w-fit">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      <span>estimated</span>
+                    </span>
+                  </td>
+                </tr>
+
+                <!-- Empty Table State -->
+                <tr *ngIf="items.length === 0">
+                  <td colspan="5" class="p-12 text-center text-xs text-gray-500">
+                    No payout history found.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Footer -->
+          <div *ngIf="totalCount > 0" class="p-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/30">
+            <!-- Showing info -->
+            <div class="flex items-center gap-3 text-xs text-gray-500">
+              <span>
+                Showing <strong class="text-gray-900">{{ showingStart }}&ndash;{{ showingEnd }}</strong>
+                of <strong class="text-gray-900">{{ totalCount }}</strong> records
+              </span>
+              <span class="text-gray-300">|</span>
+              <div class="flex items-center gap-1.5">
+                <span class="font-semibold text-gray-500 uppercase tracking-wider text-[10px]">Per page</span>
+                <select [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange()"
+                        class="bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-semibold text-gray-900 outline-none cursor-pointer">
+                  <option *ngFor="let opt of pageSizeOptions" [value]="opt">{{ opt }}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Page Buttons (if totalCount > pageSize) -->
+            <div *ngIf="totalCount > pageSize" class="flex items-center gap-1">
+              <button (click)="goToPage(page - 1)" [disabled]="page === 1"
+                      class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-[#7C3AED]/5 hover:text-[#7C3AED] hover:border-[#7C3AED]/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+              </button>
+
+              <ng-container *ngFor="let p of pageNumbers">
+                <span *ngIf="p === -1" class="w-8 h-8 flex items-center justify-center text-xs text-gray-500">&hellip;</span>
+                <button *ngIf="p !== -1"
+                        (click)="goToPage(p)"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg border text-xs font-semibold transition-all"
+                        [ngClass]="p === page
+                          ? 'bg-[#7C3AED] border-[#7C3AED] text-white shadow-sm'
+                          : 'border-gray-200 text-gray-600 hover:bg-[#7C3AED]/5 hover:text-[#7C3AED] hover:border-[#7C3AED]/30'">
+                  {{ p }}
+                </button>
+              </ng-container>
+
+              <button (click)="goToPage(page + 1)" [disabled]="page === totalPages"
+                      class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-[#7C3AED]/5 hover:text-[#7C3AED] hover:border-[#7C3AED]/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <app-publisher-footer></app-publisher-footer>
+  </div>
+</div>

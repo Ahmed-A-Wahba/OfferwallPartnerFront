@@ -1,0 +1,707 @@
+<!-- Login Page — Left/Right Split Layout -->
+<main class="flex min-h-screen w-full font-inter">
+  <!-- LEFT SIDE (45%) — Login / Forgot / Reset Forms -->
+  <section
+    [@slideUp]
+    class="flex flex-col justify-between w-[576px] min-h-screen bg-white px-24 py-12 overflow-y-auto overflow-x-hidden"
+  >
+    <!-- Header / Logo -->
+    <div class="flex flex-col">
+      <span
+        class="font-sora font-bold text-2xl leading-8 tracking-[-0.05em] text-[#6D28D9]"
+        >NEXUS</span
+      >
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- STATE: LOGIN (default)                      -->
+    <!-- ═══════════════════════════════════════════ -->
+    @if (currentState === 'login') {
+      <div class="flex flex-col py-12 gap-8">
+        <!-- Heading -->
+        <div class="flex flex-col gap-2">
+          <div class="flex flex-col">
+            <h1
+              class="font-inter font-bold text-[36px] leading-[44px] tracking-[-0.02em] text-[#151C27]"
+            >
+              Welcome back
+            </h1>
+          </div>
+          <div class="flex flex-col">
+            <p class="font-inter font-normal text-sm leading-5 text-[#4A4455]">
+              Sign in to your Publisher Portal
+            </p>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <form
+          [formGroup]="loginForm"
+          (ngSubmit)="onSubmit()"
+          class="flex flex-col gap-6"
+        >
+          <!-- Email Address -->
+          <div class="flex flex-col pt-[2.5px] gap-[5.5px]">
+            <label
+              for="login-email"
+              class="font-inter font-medium text-sm leading-5 text-[#4A4455]"
+              >Email Address</label
+            >
+            <div
+              class="flex items-center w-full bg-white border rounded-lg px-4 py-[13px] transition-all duration-200"
+              [ngClass]="{
+                'border-[#CCC3D7] focus-within:border-[#6D28D9] focus-within:ring-1 focus-within:ring-[#6D28D9]/20':
+                  !(
+                    loginForm.get('email')?.invalid &&
+                    loginForm.get('email')?.touched
+                  ),
+                'border-red-400 ring-1 ring-red-400/20':
+                  loginForm.get('email')?.invalid &&
+                  loginForm.get('email')?.touched
+              }"
+            >
+              <input
+                id="login-email"
+                type="email"
+                formControlName="email"
+                placeholder="you@company.com"
+                class="w-full bg-transparent font-inter font-normal text-sm text-[#151C27] placeholder:text-[#7B7486]/50 outline-none"
+              />
+            </div>
+            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+              <span class="text-red-500 text-xs mt-0.5">
+                @if (loginForm.get('email')?.hasError('required')) {
+                  Email address is required
+                } @else if (loginForm.get('email')?.hasError('email')) {
+                  Please enter a valid email address
+                }
+              </span>
+            }
+          </div>
+
+          <!-- Password -->
+          <div class="flex flex-col pt-[2.5px] gap-[5.5px]">
+            <div class="flex items-center justify-between">
+              <label
+                for="login-password"
+                class="font-inter font-medium text-sm leading-5 text-[#4A4455]"
+                >Password</label
+              >
+              <button
+                type="button"
+                (click)="goToForgot()"
+                class="font-inter text-xs text-[#6D28D9] hover:text-[#5B21B6] transition-colors font-medium"
+              >
+                Forgot password?
+              </button>
+            </div>
+            <div
+              class="flex items-center w-full bg-white border rounded-lg px-4 py-[13px] transition-all duration-200"
+              [ngClass]="{
+                'border-[#CCC3D7] focus-within:border-[#6D28D9] focus-within:ring-1 focus-within:ring-[#6D28D9]/20':
+                  !(
+                    loginForm.get('password')?.invalid &&
+                    loginForm.get('password')?.touched
+                  ),
+                'border-red-400 ring-1 ring-red-400/20':
+                  loginForm.get('password')?.invalid &&
+                  loginForm.get('password')?.touched
+              }"
+            >
+              <input
+                id="login-password"
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                placeholder="Enter your password"
+                class="w-full bg-transparent font-inter font-normal text-sm text-[#151C27] placeholder:text-[#7B7486]/50 outline-none"
+              />
+              <button
+                type="button"
+                (click)="togglePasswordVisibility()"
+                class="ml-2 text-[#7B7486] hover:text-[#4A4455] transition-colors duration-200 focus:outline-none"
+                aria-label="Toggle password visibility"
+              >
+                @if (showPassword) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+              <span class="text-red-500 text-xs mt-0.5">
+                Password is required
+              </span>
+            }
+          </div>
+
+          <!-- Error message -->
+          @if (errorMessage) {
+            <div
+              class="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-inter animate-fade-in"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>{{ errorMessage }}</span>
+            </div>
+          }
+
+          <!-- Sign In Button -->
+          <button
+            id="login-submit-btn"
+            type="submit"
+            [disabled]="isLoading"
+            class="relative flex items-center justify-center w-full py-4 rounded-lg font-inter font-medium text-sm leading-5 text-white transition-all duration-200 shadow-[0px_2px_4px_-2px_rgba(0,0,0,0.1),0px_4px_6px_-1px_rgba(0,0,0,0.1)]"
+            [ngClass]="{
+              'bg-[#6D28D9] hover:bg-[#5B21B6] active:bg-[#4C1D95] cursor-pointer': !isLoading,
+              'bg-[#6D28D9]/70 cursor-not-allowed': isLoading
+            }"
+          >
+            @if (isLoading) {
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Signing in...</span>
+            } @else {
+              <span>Sign in</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="13.33" height="13.33" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            }
+          </button>
+        </form>
+
+        <!-- Sign up link -->
+        <div class="flex flex-col">
+          <p class="font-inter font-normal text-sm leading-5 text-[#4A4455]">
+            Don't have an account?
+            <a
+              routerLink="/signup"
+              class="font-semibold text-[#6D28D9] hover:text-[#5B21B6] transition-colors duration-200 cursor-pointer"
+              >Sign up</a
+            >
+          </p>
+        </div>
+      </div>
+    }
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- STATE: FORGOT PASSWORD (email input)        -->
+    <!-- ═══════════════════════════════════════════ -->
+    @if (currentState === 'forgot') {
+      <div class="flex flex-col py-12 gap-8 animate-fade-in">
+        <!-- Back link -->
+        <button
+          type="button"
+          (click)="goToLogin()"
+          class="flex items-center gap-2 text-sm text-[#4A4455] hover:text-[#6D28D9] transition-colors w-fit font-medium"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          <span>Back to sign in</span>
+        </button>
+
+        <!-- Heading -->
+        <div class="flex flex-col gap-2">
+          <h1 class="font-inter font-bold text-[36px] leading-[44px] tracking-[-0.02em] text-[#151C27]">
+            Forgot password?
+          </h1>
+          <p class="font-inter font-normal text-sm leading-5 text-[#4A4455]">
+            Enter your email and we'll send you a reset code
+          </p>
+        </div>
+
+        <!-- Forgot Form -->
+        <form
+          [formGroup]="forgotForm"
+          (ngSubmit)="onSendCode()"
+          class="flex flex-col gap-6"
+        >
+          <!-- Email Address -->
+          <div class="flex flex-col pt-[2.5px] gap-[5.5px]">
+            <label
+              for="forgot-email"
+              class="font-inter font-medium text-sm leading-5 text-[#4A4455]"
+              >Email Address</label
+            >
+            <div
+              class="flex items-center w-full bg-white border rounded-lg px-4 py-[13px] transition-all duration-200"
+              [ngClass]="{
+                'border-[#CCC3D7] focus-within:border-[#6D28D9] focus-within:ring-1 focus-within:ring-[#6D28D9]/20':
+                  !(forgotForm.get('email')?.invalid && forgotForm.get('email')?.touched),
+                'border-red-400 ring-1 ring-red-400/20':
+                  forgotForm.get('email')?.invalid && forgotForm.get('email')?.touched
+              }"
+            >
+              <input
+                id="forgot-email"
+                type="email"
+                formControlName="email"
+                placeholder="you@company.com"
+                class="w-full bg-transparent font-inter font-normal text-sm text-[#151C27] placeholder:text-[#7B7486]/50 outline-none"
+              />
+            </div>
+            @if (forgotForm.get('email')?.invalid && forgotForm.get('email')?.touched) {
+              <span class="text-red-500 text-xs mt-0.5">
+                @if (forgotForm.get('email')?.hasError('required')) {
+                  Email address is required
+                } @else if (forgotForm.get('email')?.hasError('email')) {
+                  Please enter a valid email address
+                }
+              </span>
+            }
+          </div>
+
+          <!-- Error Banner -->
+          @if (sendCodeError) {
+            <div class="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-inter animate-fade-in">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>{{ sendCodeError }}</span>
+            </div>
+          }
+
+          <!-- Send Reset Code Button -->
+          <button
+            type="submit"
+            [disabled]="isSendingCode"
+            class="relative flex items-center justify-center w-full py-4 rounded-lg font-inter font-medium text-sm leading-5 text-white transition-all duration-200 shadow-[0px_2px_4px_-2px_rgba(0,0,0,0.1),0px_4px_6px_-1px_rgba(0,0,0,0.1)]"
+            [ngClass]="{
+              'bg-[#6D28D9] hover:bg-[#5B21B6] active:bg-[#4C1D95] cursor-pointer': !isSendingCode,
+              'bg-[#6D28D9]/70 cursor-not-allowed': isSendingCode
+            }"
+          >
+            @if (isSendingCode) {
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Sending...</span>
+            } @else {
+              <span>Send Reset Code</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="13.33" height="13.33" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            }
+          </button>
+        </form>
+
+        <!-- Back to sign in link -->
+        <div class="flex flex-col">
+          <p class="font-inter font-normal text-sm leading-5 text-[#4A4455]">
+            Remember your password?
+            <button
+              type="button"
+              (click)="goToLogin()"
+              class="font-semibold text-[#6D28D9] hover:text-[#5B21B6] transition-colors duration-200 cursor-pointer"
+            >Sign in</button>
+          </p>
+        </div>
+      </div>
+    }
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- STATE: RESET (OTP + new password)           -->
+    <!-- ═══════════════════════════════════════════ -->
+    @if (currentState === 'reset' && !isResetSuccess) {
+      <div class="flex flex-col py-12 gap-6 animate-fade-in">
+        <!-- Back link -->
+        <button
+          type="button"
+          (click)="goToForgot()"
+          class="flex items-center gap-2 text-sm text-[#4A4455] hover:text-[#6D28D9] transition-colors w-fit font-medium"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          <span>Back</span>
+        </button>
+
+        <!-- Shield Icon -->
+        <div class="flex justify-center mb-2">
+          <div class="w-16 h-16 rounded-full bg-[#6D28D9]/10 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#6D28D9">
+              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Heading -->
+        <div class="flex flex-col gap-2 text-center">
+          <h1 class="font-inter font-bold text-[28px] leading-[36px] tracking-[-0.02em] text-[#151C27]">
+            Reset your password
+          </h1>
+          <p class="font-inter font-normal text-sm leading-5 text-[#4A4455]">
+            We sent a 6-digit code to
+            <span class="font-semibold text-[#151C27]">{{ maskEmail(forgotEmailValue) }}</span>
+          </p>
+        </div>
+
+        <!-- Reset Form -->
+        <form [formGroup]="resetForm" (ngSubmit)="onResetPassword()" class="flex flex-col gap-5">
+          <!-- Verification Code (6 OTP boxes) -->
+          <div class="flex flex-col gap-[5.5px]">
+            <label class="font-inter font-medium text-sm leading-5 text-[#4A4455]">
+              Verification Code
+            </label>
+            <div class="flex gap-3 justify-center" (paste)="onResetOtpPaste($event)">
+              @for (i of [0,1,2,3,4,5]; track i) {
+                <input
+                  #resetOtpInput
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="1"
+                  [value]="resetOtpValues[i]"
+                  (input)="onResetOtpInput($event, i)"
+                  (keydown)="onResetOtpKeydown($event, i)"
+                  class="w-12 h-14 text-center font-inter font-bold text-lg rounded-lg border-2 outline-none transition-all duration-200 bg-white"
+                  [ngClass]="{
+                    'border-red-400 ring-1 ring-red-400/20': otpError,
+                    'border-[#CCC3D7] focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9]/20': !otpError
+                  }"
+                />
+              }
+            </div>
+            @if (otpError) {
+              <span class="text-red-500 text-xs mt-1 text-center">Invalid or expired verification code</span>
+            }
+          </div>
+
+          <!-- New Password -->
+          <div class="flex flex-col pt-[2.5px] gap-[5.5px]">
+            <label
+              for="new-password"
+              class="font-inter font-medium text-sm leading-5 text-[#4A4455]"
+              >New Password</label
+            >
+            <div
+              class="flex items-center w-full bg-white border rounded-lg px-4 py-[13px] transition-all duration-200"
+              [ngClass]="{
+                'border-[#CCC3D7] focus-within:border-[#6D28D9] focus-within:ring-1 focus-within:ring-[#6D28D9]/20':
+                  !(resetForm.get('newPassword')?.invalid && resetForm.get('newPassword')?.touched),
+                'border-red-400 ring-1 ring-red-400/20':
+                  resetForm.get('newPassword')?.invalid && resetForm.get('newPassword')?.touched
+              }"
+            >
+              <input
+                id="new-password"
+                [type]="showNewPassword ? 'text' : 'password'"
+                formControlName="newPassword"
+                placeholder="Min. 8 characters"
+                class="w-full bg-transparent font-inter font-normal text-sm text-[#151C27] placeholder:text-[#7B7486]/50 outline-none"
+              />
+              <button
+                type="button"
+                (click)="showNewPassword = !showNewPassword"
+                class="ml-2 text-[#7B7486] hover:text-[#4A4455] transition-colors duration-200 focus:outline-none"
+                aria-label="Toggle new password visibility"
+              >
+                @if (showNewPassword) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                }
+              </button>
+            </div>
+
+            <!-- Password Strength Bars -->
+            <div class="flex gap-1 mt-2">
+              @for (bar of strengthBars; track bar) {
+                <div
+                  class="h-1 flex-1 rounded-full transition-colors duration-200"
+                  [ngClass]="{
+                    'bg-red-400':    passwordStrength >= bar && passwordStrength === 1,
+                    'bg-orange-400': passwordStrength >= bar && passwordStrength === 2,
+                    'bg-yellow-400': passwordStrength >= bar && passwordStrength === 3,
+                    'bg-green-500':  passwordStrength >= bar && passwordStrength === 4,
+                    'bg-[#CCC3D7]/40':  passwordStrength < bar
+                  }"
+                ></div>
+              }
+            </div>
+            @if (passwordStrength > 0) {
+              <span
+                class="text-xs mt-0.5 font-medium"
+                [ngClass]="{
+                  'text-red-400':    passwordStrength === 1,
+                  'text-orange-400': passwordStrength === 2,
+                  'text-yellow-500': passwordStrength === 3,
+                  'text-green-500':  passwordStrength === 4
+                }"
+              >{{ strengthLabel }}</span>
+            }
+          </div>
+
+          <!-- Confirm New Password -->
+          <div class="flex flex-col pt-[2.5px] gap-[5.5px]">
+            <label
+              for="confirm-password"
+              class="font-inter font-medium text-sm leading-5 text-[#4A4455]"
+              >Confirm New Password</label
+            >
+            <div
+              class="flex items-center w-full bg-white border rounded-lg px-4 py-[13px] transition-all duration-200"
+              [ngClass]="{
+                'border-[#CCC3D7] focus-within:border-[#6D28D9] focus-within:ring-1 focus-within:ring-[#6D28D9]/20':
+                  !(resetForm.hasError('mismatch') && resetForm.get('confirmPassword')?.touched),
+                'border-red-400 ring-1 ring-red-400/20':
+                  resetForm.hasError('mismatch') && resetForm.get('confirmPassword')?.touched
+              }"
+            >
+              <input
+                id="confirm-password"
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                formControlName="confirmPassword"
+                placeholder="••••••••"
+                class="w-full bg-transparent font-inter font-normal text-sm text-[#151C27] placeholder:text-[#7B7486]/50 outline-none"
+              />
+              <button
+                type="button"
+                (click)="showConfirmPassword = !showConfirmPassword"
+                class="ml-2 text-[#7B7486] hover:text-[#4A4455] transition-colors duration-200 focus:outline-none"
+                aria-label="Toggle confirm password visibility"
+              >
+                @if (showConfirmPassword) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (resetForm.hasError('mismatch') && resetForm.get('confirmPassword')?.touched) {
+              <span class="text-red-500 text-xs mt-0.5">Passwords do not match</span>
+            }
+          </div>
+
+          <!-- Error Banner -->
+          @if (resetError) {
+            <div class="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-inter animate-fade-in">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>{{ resetError }}</span>
+            </div>
+          }
+
+          <!-- Reset Password Button -->
+          <button
+            type="submit"
+            [disabled]="isResetting || !canResetPassword"
+            class="relative flex items-center justify-center w-full py-4 rounded-lg font-inter font-medium text-sm leading-5 text-white transition-all duration-200 shadow-[0px_2px_4px_-2px_rgba(0,0,0,0.1),0px_4px_6px_-1px_rgba(0,0,0,0.1)]"
+            [ngClass]="{
+              'bg-[#6D28D9] hover:bg-[#5B21B6] active:bg-[#4C1D95] cursor-pointer': !isResetting && canResetPassword,
+              'bg-[#6D28D9]/40 cursor-not-allowed': isResetting || !canResetPassword
+            }"
+          >
+            @if (isResetting) {
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Resetting...</span>
+            } @else {
+              <span>Reset Password</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="13.33" height="13.33" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            }
+          </button>
+        </form>
+      </div>
+    }
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- STATE: RESET SUCCESS                        -->
+    <!-- ═══════════════════════════════════════════ -->
+    @if (currentState === 'reset' && isResetSuccess) {
+      <div class="flex flex-col items-center justify-center py-12 gap-6 animate-fade-in">
+        <!-- Green Checkmark Circle -->
+        <div class="w-20 h-20 rounded-full bg-green-50 border-2 border-green-200 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+
+        <!-- Text -->
+        <div class="flex flex-col items-center gap-2 text-center">
+          <h2 class="font-inter font-bold text-2xl text-[#151C27]">Password updated!</h2>
+          <p class="font-inter font-normal text-sm leading-5 text-[#4A4455]">
+            You can now sign in with your new password.
+          </p>
+        </div>
+
+        <!-- Bouncing dots -->
+        <div class="flex items-center gap-1.5 pt-4">
+          <div class="w-2 h-2 rounded-full bg-[#6D28D9] animate-bounce" style="animation-delay: 0ms"></div>
+          <div class="w-2 h-2 rounded-full bg-[#6D28D9] animate-bounce" style="animation-delay: 150ms"></div>
+          <div class="w-2 h-2 rounded-full bg-[#6D28D9] animate-bounce" style="animation-delay: 300ms"></div>
+        </div>
+      </div>
+    }
+
+    <!-- Footer (always visible) -->
+    <div class="flex flex-col justify-end flex-1">
+      <div
+        class="flex items-center gap-2 pt-8 border-t border-[#CCC3D7]/30 opacity-70"
+      >
+        <!-- Shield / Lock Icon -->
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="15.75"
+          viewBox="0 0 24 24"
+          fill="#4A4455"
+        >
+          <path
+            d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"
+          />
+        </svg>
+        <span
+          class="font-inter font-semibold text-xs leading-4 text-[#4A4455]"
+          >Protected by industry-standard encryption</span
+        >
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT SIDE (55%) — Branding Panel (unchanged) -->
+  <section
+    class="relative flex flex-col justify-between flex-1 min-h-screen bg-[#0F0F1A] px-16 py-16 overflow-hidden"
+  >
+    <!-- Background Decoration — Purple blur -->
+    <div
+      class="absolute w-96 h-96 rounded-full bg-[#5300B7]/20 blur-[60px] pointer-events-none"
+      style="top: -96px; right: 0"
+    ></div>
+
+    <!-- Bottom gradient overlay -->
+    <div
+      class="absolute bottom-0 left-0 w-full h-[512px] pointer-events-none"
+      style="
+        background: linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0.4) 0%,
+          rgba(0, 0, 0, 0) 100%
+        );
+      "
+    ></div>
+
+    <!-- Abstract SVG background element -->
+    <div
+      class="absolute opacity-10 pointer-events-none"
+      style="left: 254px; top: 574px"
+    >
+      <svg width="600" height="600" viewBox="0 0 600 600" fill="none">
+        <circle cx="300" cy="300" r="280" stroke="white" stroke-width="0.5" opacity="0.3" />
+        <circle cx="300" cy="300" r="200" stroke="white" stroke-width="0.5" opacity="0.2" />
+        <circle cx="300" cy="300" r="120" stroke="white" stroke-width="0.5" opacity="0.1" />
+      </svg>
+    </div>
+
+    <!-- Header -->
+    <div class="relative z-10 flex items-center justify-between w-full">
+      <span class="font-sora font-bold text-2xl leading-8 tracking-[-0.05em] text-white">NEXUS</span>
+      <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-[#006C4A]/10 border border-[#006C4A]/20">
+        <div class="w-2 h-2 rounded-full bg-[#006C4A]"></div>
+        <span class="font-inter font-semibold text-xs leading-[18px] tracking-[0.05em] uppercase text-[#006C4A]">ALL SYSTEMS OPERATIONAL</span>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="relative z-10 flex flex-col gap-6">
+      <div class="flex flex-col">
+        <h2 class="font-sora font-bold text-[44px] leading-[55px] text-white">
+          The first offerwall built<br />for e-commerce
+        </h2>
+      </div>
+
+      <div class="max-w-[512px]">
+        <p class="font-inter font-normal text-base leading-[26px] text-[#7B7486]">
+          NEXUS bridges the gap between digital rewards and physical retail.
+          We help publishers turn engagement into real-world purchasing
+          power through sophisticated loyalty pipelines.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-8 pt-6">
+        <!-- Feature 1 -->
+        <div class="flex items-start gap-5">
+          <div class="flex items-center justify-center p-3 pb-[18px] rounded-xl bg-[#1A1A2E] border border-white/5 shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 24 24" fill="white">
+              <path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z" />
+            </svg>
+          </div>
+          <div class="flex flex-col gap-1">
+            <h3 class="font-inter font-semibold text-xl leading-7 text-white">Retail-ready integration</h3>
+            <p class="font-inter font-normal text-sm leading-5 text-[#7B7486]">Drop the offerwall into your storefront with a single iframe.</p>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="flex items-start gap-5">
+          <div class="flex items-center justify-center p-3 pb-[18px] rounded-xl bg-[#1A1A2E] border border-white/5 shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20" viewBox="0 0 24 24" fill="white">
+              <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
+            </svg>
+          </div>
+          <div class="flex flex-col gap-1">
+            <h3 class="font-inter font-semibold text-xl leading-7 text-white">Built for online stores</h3>
+            <p class="font-inter font-normal text-sm leading-5 text-[#7B7486]">Purpose-made for e-commerce checkout and loyalty flows.</p>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="flex items-start gap-5">
+          <div class="flex items-center justify-center p-3 pb-[18px] rounded-xl bg-[#1A1A2E] border border-white/5 shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 24 24" fill="white">
+              <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
+            </svg>
+          </div>
+          <div class="flex flex-col gap-1">
+            <h3 class="font-inter font-semibold text-xl leading-7 text-white">Real-time payouts</h3>
+            <p class="font-inter font-normal text-sm leading-5 text-[#7B7486]">Track redemptions and get paid on your schedule.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="relative z-10 flex items-center gap-6 opacity-60">
+      <span class="font-inter font-medium text-xs leading-4 text-[#7B7486]">Trusted by leading e-commerce platforms across the region</span>
+    </div>
+  </section>
+
+</main>

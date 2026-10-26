@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="nexus-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED" />
+      <stop offset="100%" stop-color="#6D28D9" />
+    </linearGradient>
+  </defs>
+  <!-- Beautiful glowing circle background -->
+  <circle cx="256" cy="256" r="240" fill="url(#nexus-grad)" />
+  <!-- Elegant futuristic stylized letter 'N' -->
+  <path d="M160 140h60l132 184V140h50v232h-60L210 188v184h-50z" fill="#FFFFFF" />
+</svg>

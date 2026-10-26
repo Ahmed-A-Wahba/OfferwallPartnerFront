@@ -1,0 +1,542 @@
+<div class="flex min-h-screen bg-[#F9F9FF] font-inter">
+  <!-- ───────── TOAST NOTIFICATIONS OVERLAY ───────── -->
+  <div class="fixed top-5 right-5 z-50 flex flex-col gap-2.5 max-w-md w-full pointer-events-none px-4">
+    <div
+      *ngFor="let toast of toasts"
+      class="pointer-events-auto flex items-center justify-between p-4 rounded-xl shadow-lg border backdrop-blur-md transition-all duration-300 animate-slide-in"
+      [ngClass]="{
+        'bg-emerald-950/90 border-emerald-500/40 text-emerald-200': toast.type === 'success',
+        'bg-red-950/90 border-red-500/40 text-red-200': toast.type === 'error',
+        'bg-purple-950/90 border-purple-500/40 text-purple-200': toast.type === 'info'
+      }">
+      <div class="flex items-center gap-3">
+        <svg *if="toast.type === 'success'" class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <svg *if="toast.type === 'error'" class="w-5 h-5 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <svg *if="toast.type === 'info'" class="w-5 h-5 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="text-xs font-semibold">{{ toast.message }}</span>
+      </div>
+      <button (click)="removeToast(toast.id)" class="text-white/60 hover:text-white ml-4 focus:outline-none">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ───────── REGENERATE API KEY CONFIRMATION MODAL ───────── -->
+  <div *ngIf="showRegenerateModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-[#EEEEF4] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-6 animate-scale-up">
+      <div class="flex items-start gap-4">
+        <div class="p-3 bg-amber-50 border border-amber-200 text-amber-600 rounded-xl shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-sora font-bold text-lg text-[#151C27]">Regenerate Production API Key?</h3>
+          <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">
+            This will invalidate your current API key. Any live integrations using it will stop working until updated. Continue?
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#EEEEF4]">
+        <button
+          type="button"
+          (click)="closeRegenerateModal()"
+          [disabled]="isRegeneratingKey"
+          class="px-4 py-2 rounded-xl border border-[#EEEEF4] text-xs font-semibold text-[#64748B] hover:bg-gray-50 transition-colors">
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="confirmRegenerateApiKey()"
+          [disabled]="isRegeneratingKey"
+          class="px-4 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-semibold transition-all flex items-center gap-2 shadow-sm">
+          <span *ngIf="isRegeneratingKey" class="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white"></span>
+          <span>{{ isRegeneratingKey ? 'Regenerating...' : 'Confirm Regenerate' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── 1. SIDEBAR NAVIGATION ───────── -->
+  <app-publisher-sidebar></app-publisher-sidebar>
+
+  <!-- ───────── 2. MAIN WORKSPACE CONTENT ───────── -->
+  <div class="flex-1 pl-64 flex flex-col min-h-screen">
+    <!-- Header Navigation Bar -->
+    <app-publisher-header title="iFrame Integration"></app-publisher-header>
+
+    <!-- Page Body Content -->
+    <main class="flex-1 p-8 space-y-8 max-w-7xl mx-auto w-full">
+      <!-- Loader State -->
+      <div *ngIf="isLoading" class="w-full flex items-center justify-center py-20">
+        <div class="flex flex-col items-center gap-3">
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#7C3AED]"></div>
+          <span class="text-xs font-semibold text-[#64748B]">Loading Integration Data...</span>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="errorMessage" class="w-full p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm flex items-center gap-3">
+        <svg class="w-5 h-5 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <div *ngIf="!isLoading" class="space-y-8">
+        <!-- Page Title & Subtitle Header -->
+        <div class="flex flex-col gap-1">
+          <h2 class="font-sora font-extrabold text-2xl text-[#151C27] tracking-tight">iFrame Integration</h2>
+          <p class="text-xs text-[#64748B]">Configure your offer wall embed, points conversion rate, and preview your live integration</p>
+        </div>
+
+        <!-- ───────── 1. GETTING STARTED BANNER CARD ───────── -->
+        <section class="bg-gradient-to-r from-purple-900/5 via-purple-600/5 to-white border border-[#7C3AED]/20 rounded-2xl p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                   [ngClass]="completedSteps === 2 ? 'bg-green-100' : 'bg-purple-100 text-purple-700'">
+                @if (completedSteps === 2) {
+                  <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                  </svg>
+                } @else {
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                }
+              </div>
+              <h3 class="font-sora font-bold text-lg text-[#151C27]">Getting Started</h3>
+            </div>
+            <span class="text-xs font-bold px-3 py-1 bg-[#7C3AED]/10 text-[#7C3AED] rounded-full">
+              {{ completedSteps }} of 2 steps complete
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Step 1: Retrieve Production API Key -->
+            <div class="bg-white border border-[#EEEEF4] rounded-xl p-4 flex flex-col justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors"
+                     [ngClass]="step1Complete ? 'bg-green-100 text-green-600' : 'bg-purple-100 text-purple-700'">
+                  @if (step1Complete) {
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  } @else {
+                    1
+                  }
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold"
+                      [ngClass]="step1Complete ? 'text-green-700' : 'text-[#151C27]'">
+                    Retrieve Production API Key
+                    @if (step1Complete) {
+                      <span class="ml-2 text-xs font-normal text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                        ✓ Done
+                      </span>
+                    }
+                  </h4>
+                  <p class="text-xs text-[#64748B] mt-0.5">Copy your secure API key required for server-to-server postbacks</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 pt-2 border-t border-[#EEEEF4]/40">
+                <button
+                  type="button"
+                  (click)="onCopyKey()"
+                  [ngClass]="step1Complete ? 'bg-green-600 hover:bg-green-700' : 'bg-purple-700 hover:bg-purple-800'"
+                  class="px-4 py-2 rounded-xl text-white text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm">
+                  @if (step1Complete) {
+                    ✓ Key Copied
+                  } @else {
+                    Copy Key
+                  }
+                </button>
+
+                <!-- Revealed after Step 1 completed / key copied at least once -->
+                <button
+                  *ngIf="keyCopiedAtLeastOnce || step1Complete"
+                  type="button"
+                  (click)="openRegenerateModal()"
+                  class="px-3 py-2 rounded-xl border border-[#7C3AED] text-[#7C3AED] hover:bg-[#7C3AED]/10 text-xs font-semibold transition-all flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  <span>Regenerate Key</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2: Perform Test Integration -->
+            <div class="bg-white border border-[#EEEEF4] rounded-xl p-4 flex flex-col justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors"
+                     [ngClass]="step2Complete ? 'bg-green-100 text-green-600' : 'bg-purple-100 text-purple-700'">
+                  @if (step2Complete) {
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  } @else {
+                    2
+                  }
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold"
+                      [ngClass]="step2Complete ? 'text-green-700' : 'text-[#151C27]'">
+                    Perform Test Integration
+                    @if (step2Complete) {
+                      <span class="ml-2 text-xs font-normal text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                        ✓ Done
+                      </span>
+                    }
+                  </h4>
+                  <p class="text-xs text-[#64748B] mt-0.5">Test rendering your Offer Wall iframe in the interactive mobile device preview</p>
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-[#EEEEF4]/40">
+                <button
+                  type="button"
+                  (click)="onOpenPreview()"
+                  [ngClass]="step2Complete ? 'border-green-500 text-green-600 hover:bg-green-50' : 'border-purple-700 text-purple-700 hover:bg-purple-50'"
+                  class="px-4 py-2 rounded-xl border text-xs font-semibold transition-all flex items-center gap-1.5">
+                  @if (step2Complete) {
+                    ✓ Preview Opened
+                  } @else {
+                    Open Preview
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ───────── 2. OFFER WALL URL CARD & 3. POINTS CONFIGURATION CARD ───────── -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Card 2: Offer Wall URL -->
+          <div class="bg-white border border-[#EEEEF4] rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-4">
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#7C3AED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                </svg>
+                <h3 class="font-sora font-bold text-lg text-[#151C27]">Offer Wall URL</h3>
+              </div>
+              <p class="text-xs text-[#64748B]">Direct link to your hosted offer wall. Embed this into your web or mobile view.</p>
+            </div>
+
+            <div class="space-y-3">
+              <div class="flex items-center gap-2">
+                <input
+                  type="text"
+                  readonly
+                  [value]="offerWallUrl"
+                  class="flex-1 bg-[#F9FAFB] border border-[#EEEEF4] rounded-xl px-3.5 py-2.5 text-xs font-mono text-[#151C27] focus:outline-none select-all" />
+                <button
+                  type="button"
+                  (click)="copyOfferWallUrl()"
+                  class="px-4 py-2.5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 shadow-sm">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+
+              <div class="flex items-start gap-2 p-3 bg-purple-50/60 border border-purple-100 rounded-xl text-xs text-[#64748B]">
+                <svg class="w-4 h-4 text-[#7C3AED] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Replace <code class="font-mono text-purple-700 font-bold">USER_ID</code> with your user's unique identifier to track earnings correctly.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Points Configuration -->
+          <div class="bg-white border border-[#EEEEF4] rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-4">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <svg class="w-5 h-5 text-[#7C3AED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <h3 class="font-sora font-bold text-lg text-[#151C27]">Points Configuration</h3>
+                </div>
+
+                <!-- Current Rate Badge -->
+                <span class="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
+                  Current rate: {{ integrationData?.pointsPerUsd || 0 }} pts = $1.00 USD
+                </span>
+              </div>
+              <p class="text-xs text-[#64748B]">Set how many points your users earn for every $1.00 USD of offer revenue.</p>
+            </div>
+
+            <!-- Form -->
+            <form [formGroup]="pointsForm" (ngSubmit)="onSavePointsRate()" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-[#151C27] mb-1.5">Points Per $1.00 USD</label>
+                <div class="flex items-center gap-2">
+                  <input
+                    type="number"
+                    formControlName="pointsPerUsd"
+                    placeholder="e.g. 100"
+                    class="flex-1 bg-[#F9FAFB] border border-[#EEEEF4] rounded-xl px-3.5 py-2 text-sm font-semibold text-[#151C27] focus:outline-none focus:border-[#7C3AED]"
+                    [class.!border-red-500]="pointsForm.get('pointsPerUsd')?.invalid && pointsForm.get('pointsPerUsd')?.touched" />
+
+                  <button
+                    type="submit"
+                    [disabled]="isSavingRate"
+                    class="px-4 py-2 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold transition-all flex items-center gap-2 shadow-sm disabled:opacity-50">
+                    <span *ngIf="isSavingRate" class="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white"></span>
+                    <span>{{ isSavingRate ? 'Saving...' : 'Save Rate' }}</span>
+                  </button>
+                </div>
+
+                <!-- Inline Error Messages -->
+                <div *ngIf="pointsForm.get('pointsPerUsd')?.invalid && pointsForm.get('pointsPerUsd')?.touched" class="text-red-500 text-xs mt-1.5 space-y-0.5">
+                  <p *ngIf="pointsForm.get('pointsPerUsd')?.hasError('required')">Points rate is required.</p>
+                  <p *ngIf="pointsForm.get('pointsPerUsd')?.hasError('min')">Points rate must be greater than 0.</p>
+                  <p *ngIf="pointsForm.get('pointsPerUsd')?.hasError('max')">Points rate cannot exceed 100,000.</p>
+                  <p *ngIf="pointsForm.get('pointsPerUsd')?.hasError('notInteger')">Points rate must be a whole integer.</p>
+                </div>
+              </div>
+
+              <!-- Dynamic Helper Text -->
+              <p class="text-xs text-[#64748B]">
+                Your users will earn <strong class="text-[#7C3AED] font-bold">{{ pointsForm.get('pointsPerUsd')?.value || integrationData?.pointsPerUsd || 100 }} pts</strong> for every $1.00 of offer value.
+              </p>
+
+              <!-- Warning Banner -->
+              <div class="flex items-start gap-2.5 p-3 bg-amber-50/80 border border-amber-200/80 rounded-xl text-xs text-amber-900">
+                <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <span>Changing points conversion rate affects all new conversions immediately. Existing pending conversions will retain their original rate.</span>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- ───────── 4. URL PARAMETERS REFERENCE TABLE ───────── -->
+        <section class="bg-white border border-[#EEEEF4] rounded-2xl shadow-sm overflow-hidden">
+          <div class="p-6 border-b border-[#EEEEF4]/40">
+            <h3 class="font-sora font-bold text-lg text-[#151C27]">URL Parameters Reference</h3>
+            <p class="text-xs text-[#64748B]">Query parameters accepted by the offer wall iframe URL.</p>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-[#EEEEF4]/60 bg-[#F9FAFB]/50 text-xs font-semibold text-[#64748B]">
+                  <th class="p-4 pl-6">Parameter</th>
+                  <th class="p-4">Type</th>
+                  <th class="p-4">Required</th>
+                  <th class="p-4 pr-6">Description</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#EEEEF4]/40 text-xs text-[#151C27]">
+                <tr class="hover:bg-[#F9FAFB]/40 transition-colors">
+                  <td class="p-4 pl-6 font-mono font-bold text-purple-700">pub_id</td>
+                  <td class="p-4 font-mono text-[#64748B]">String (GUID)</td>
+                  <td class="p-4">
+                    <span class="px-2.5 py-0.5 bg-red-50 text-red-600 border border-red-200 font-bold rounded-md uppercase tracking-wider text-[10px]">REQUIRED</span>
+                  </td>
+                  <td class="p-4 pr-6 text-[#64748B]">Your unique partner publisher identifier (<code class="font-mono text-gray-800">{{ integrationData?.publisherId }}</code>)</td>
+                </tr>
+                <tr class="hover:bg-[#F9FAFB]/40 transition-colors">
+                  <td class="p-4 pl-6 font-mono font-bold text-purple-700">user_id</td>
+                  <td class="p-4 font-mono text-[#64748B]">String</td>
+                  <td class="p-4">
+                    <span class="px-2.5 py-0.5 bg-red-50 text-red-600 border border-red-200 font-bold rounded-md uppercase tracking-wider text-[10px]">REQUIRED</span>
+                  </td>
+                  <td class="p-4 pr-6 text-[#64748B]">Your end-user's unique identifier in your application (used to attribute earnings)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ───────── 5. EMBED CODE CARD ───────── -->
+        <section class="bg-white border border-[#EEEEF4] rounded-2xl p-6 shadow-sm space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 class="font-sora font-bold text-lg text-[#151C27]">Embed Code</h3>
+              <p class="text-xs text-[#64748B]">Copy and paste this HTML snippet directly into your web application page.</p>
+            </div>
+            <button
+              type="button"
+              (click)="copyEmbedCode()"
+              class="px-4 py-2.5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 shadow-sm self-start sm:self-auto">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+              </svg>
+              <span>Copy Code</span>
+            </button>
+          </div>
+
+          <div class="relative bg-[#151C27] rounded-xl p-5 border border-gray-800 font-mono text-xs overflow-x-auto shadow-inner">
+            <pre class="text-purple-300"><code>{{ embedCodeSnippet }}</code></pre>
+          </div>
+        </section>
+
+        <!-- ───────── 6. LIVE PREVIEW PANEL ───────── -->
+        <section id="live-preview-section" class="bg-white border border-[#EEEEF4] rounded-2xl p-6 shadow-sm space-y-6">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#EEEEF4] pb-6">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <h3 class="font-sora font-bold text-lg text-[#151C27]">Live Integration Preview</h3>
+              </div>
+              <p class="text-xs text-[#64748B] mt-0.5">Test your offer wall iframe rendering with a custom test User ID.</p>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="flex items-center gap-2 bg-[#F9FAFB] border border-[#EEEEF4] rounded-xl px-3 py-1.5">
+                <span class="text-xs font-semibold text-[#64748B]">User ID:</span>
+                <input
+                  type="text"
+                  [(ngModel)]="testUserId"
+                  placeholder="user_123"
+                  class="bg-transparent text-xs font-mono font-bold text-[#151C27] outline-none w-28" />
+              </div>
+              <button
+                type="button"
+                (click)="updatePreview()"
+                class="px-4 py-2 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold transition-all">
+                Update Preview
+              </button>
+              <button
+                type="button"
+                (click)="openPreviewInNewTab()"
+                class="px-3.5 py-2 rounded-xl border border-[#EEEEF4] text-[#64748B] hover:text-[#151C27] hover:bg-gray-50 text-xs font-semibold transition-all flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+                <span>Open in New Tab</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Phone Frame Container -->
+          <div class="flex justify-center py-6">
+            <div class="relative w-[360px] h-[680px] bg-gray-900 rounded-[48px] p-4 shadow-2xl border-4 border-gray-800 flex flex-col justify-between overflow-hidden">
+              <!-- Phone Notch / Island -->
+              <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-5 bg-gray-900 rounded-b-2xl z-20 flex items-center justify-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-gray-950 border border-gray-800"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-gray-950"></div>
+              </div>
+
+              <!-- Phone Screen Area -->
+              <div class="w-full h-full bg-[#F9F9FF] rounded-[36px] overflow-hidden flex flex-col pt-4">
+                <!-- Phone Status Bar -->
+                <div class="px-6 py-1 flex items-center justify-between text-[10px] font-bold text-gray-800 select-none bg-white border-b border-gray-100">
+                  <span>9:41</span>
+                  <div class="flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h10a3 3 0 013 3v5a.997.997 0 01-.293.707zM5 4a1 1 0 00-1 1v3.586l6 6 6-6V5a1 1 0 00-1-1H5z" clip-rule="evenodd"></path></svg>
+                  </div>
+                </div>
+
+                <!-- Phone Header Banner -->
+                <div class="bg-gradient-to-r from-purple-700 to-indigo-800 p-4 text-white flex items-center justify-between shadow-md">
+                  <div class="flex items-center gap-2">
+                    <span class="font-sora font-extrabold text-sm tracking-tight text-white">NEXUS</span>
+                    <span class="text-[9px] bg-white/20 px-1.5 py-0.5 rounded font-mono">OFFERWALL</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">
+                      {{ (integrationData?.pointsPerUsd || 100) * 10 }} pts / $10
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Embedded Iframe or Interactive Offerwall Preview -->
+                <div class="flex-1 relative overflow-y-auto p-4 space-y-3">
+                  <!-- Test User Bar -->
+                  <div class="p-2.5 bg-white rounded-xl border border-[#EEEEF4] flex items-center justify-between text-[11px] shadow-sm">
+                    <span class="text-gray-500 font-medium">Logged in User:</span>
+                    <span class="font-mono font-bold text-purple-700">{{ previewUserId }}</span>
+                  </div>
+
+                  <!-- Offer Wall Sample Cards -->
+                  <div class="text-[11px] font-bold text-gray-700 uppercase tracking-wider mt-2">Available Offers</div>
+
+                  <!-- Offer 1 -->
+                  <div class="bg-white border border-[#EEEEF4] rounded-xl p-3 shadow-sm hover:shadow transition-all flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">
+                        🎮
+                      </div>
+                      <div>
+                        <h5 class="text-xs font-bold text-gray-900">Reach Level 10</h5>
+                        <p class="text-[10px] text-gray-500">Play Hero Quest & unlock reward</p>
+                      </div>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                      +{{ (integrationData?.pointsPerUsd || 100) * 5 }} pts
+                    </span>
+                  </div>
+
+                  <!-- Offer 2 -->
+                  <div class="bg-white border border-[#EEEEF4] rounded-xl p-3 shadow-sm hover:shadow transition-all flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
+                        📝
+                      </div>
+                      <div>
+                        <h5 class="text-xs font-bold text-gray-900">Complete 3-Min Survey</h5>
+                        <p class="text-[10px] text-gray-500">Share your feedback on tech</p>
+                      </div>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                      +{{ (integrationData?.pointsPerUsd || 100) * 2 }} pts
+                    </span>
+                  </div>
+
+                  <!-- Offer 3 -->
+                  <div class="bg-white border border-[#EEEEF4] rounded-xl p-3 shadow-sm hover:shadow transition-all flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">
+                        🎬
+                      </div>
+                      <div>
+                        <h5 class="text-xs font-bold text-gray-900">Watch Video Trailer</h5>
+                        <p class="text-[10px] text-gray-500">Watch 30s product demo</p>
+                      </div>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                      +{{ (integrationData?.pointsPerUsd || 100) * 0.5 }} pts
+                    </span>
+                  </div>
+
+                  <div class="pt-2 text-center">
+                    <span class="text-[10px] text-gray-400">Powered by NEXUS Offerwall Platform</span>
+                  </div>
+                </div>
+
+                <!-- Phone Bottom Bar -->
+                <div class="h-4 bg-white flex items-center justify-center pb-1">
+                  <div class="w-24 h-1 bg-gray-300 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <app-publisher-footer></app-publisher-footer>
+  </div>
+</div>

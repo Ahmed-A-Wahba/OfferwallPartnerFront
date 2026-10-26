@@ -1,0 +1,39 @@
+<header class="sticky top-0 h-16 bg-white/80 backdrop-blur-md border-b border-[#EEEEF4] px-8 flex items-center justify-between z-20">
+  <div class="flex items-center gap-2">
+    <span class="font-sora font-extrabold text-[#7C3AED] leading-none text-xl select-none">NEXUS</span>
+    <span *ngIf="title" class="text-xs font-medium text-[#64748B]/60 uppercase tracking-widest leading-none border-l border-[#EEEEF4] pl-2">
+      {{ title }}
+    </span>
+  </div>
+
+  <div class="flex items-center gap-6 md:gap-8 ml-auto">
+    <!-- Live Status indicator -->
+    <div class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-[#006C4A]"></span>
+      <span class="text-xs font-semibold text-[#006C4A]">Live Status</span>
+    </div>
+
+    <!-- Total Paid Stats Summary -->
+    <div class="h-6 border-r border-[#EEEEF4]"></div>
+    <div class="text-sm font-medium text-[#64748B]">
+      Total Paid: <span class="font-bold text-[#151C27]">{{ (overview?.totalPaid || 0) | currency:'USD':'symbol':'1.2-2' }}</span>
+    </div>
+
+    <!-- User Profile Avatar / Logo -->
+    <div class="h-6 border-r border-[#EEEEF4]"></div>
+    <a routerLink="/settings" class="flex items-center gap-3 p-1.5 -mr-1.5 rounded-xl hover:bg-[#7C3AED]/5 transition-all cursor-pointer group">
+      <div class="w-9 h-9 rounded-full bg-[#EBDDFF] border border-[#7C3AED]/20 flex items-center justify-center select-none shadow-sm group-hover:border-[#7C3AED]/40 transition-colors overflow-hidden shrink-0">
+        <img
+          *ngIf="logoUrl && !imageFailed"
+          [src]="logoUrl"
+          (error)="onImageError()"
+          alt="Company Logo"
+          class="w-full h-full object-cover" />
+        <span *ngIf="!logoUrl || imageFailed" class="font-inter font-bold text-sm text-[#7C3AED]">{{ companyInitials }}</span>
+      </div>
+      <span class="text-sm font-semibold text-[#151C27] group-hover:text-[#7C3AED] transition-colors">
+        {{ overview?.companyName || 'Publisher' }}
+      </span>
+    </a>
+  </div>
+</header>

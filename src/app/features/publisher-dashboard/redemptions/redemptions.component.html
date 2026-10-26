@@ -1,0 +1,310 @@
+<div class="flex min-h-screen bg-[#F9F9FF] font-inter">
+
+  <!-- ───────── SIDEBAR ───────── -->
+  <app-publisher-sidebar></app-publisher-sidebar>
+
+  <!-- ───────── MAIN CONTENT ───────── -->
+  <div class="flex-1 pl-64 flex flex-col min-h-screen">
+
+    <!-- Top Header -->
+    <app-publisher-header title="Reports"></app-publisher-header>
+
+    <!-- Page Body -->
+    <main class="flex-1 p-8 space-y-6 max-w-7xl mx-auto w-full">
+
+      <!-- Page Title Row -->
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="font-sora font-extrabold text-2xl text-[#151C27] tracking-tight">Redemptions</h2>
+          <p class="text-xs text-[#64748B] mt-1">Track all user redemptions and point conversions</p>
+        </div>
+        <!-- Export CSV button -->
+        <div class="flex flex-col items-end">
+          @if (exportError) {
+            <div class="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-2">
+              {{ exportError }}
+            </div>
+          }
+
+          <button
+            type="button"
+            (click)="onExportCsv()"
+            [disabled]="isExporting"
+            class="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+            @if (isExporting) {
+              <svg class="animate-spin w-4 h-4 text-purple-700" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
+              <span class="text-purple-700">Exporting...</span>
+            } @else {
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              <span class="text-gray-700">Export CSV</span>
+            }
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Summary Cards ── -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <!-- Card: Total Redeemed USD -->
+        <div class="bg-white border border-[#EEEEF4] rounded-2xl p-6 shadow-sm flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-[#64748B] uppercase tracking-wider">Total Redeemed (USD)</span>
+            <div class="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+          </div>
+          <div *ngIf="isLoadingOverview" class="h-8 w-32 bg-gray-100 animate-pulse rounded-lg"></div>
+          <div *ngIf="!isLoadingOverview" class="text-3xl font-extrabold text-[#151C27]">
+            {{ (reportOverview?.totalRedeemedUsd || 0) | currency:'USD':'symbol':'1.2-2' }}
+          </div>
+          <p class="text-xs text-[#64748B]">For selected date range</p>
+        </div>
+
+        <!-- Card: Total Coupons Generated -->
+        <div class="bg-white border border-[#EEEEF4] rounded-2xl p-6 shadow-sm flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-[#64748B] uppercase tracking-wider">Total Coupons Generated</span>
+            <div class="p-2 rounded-xl bg-purple-50 text-[#7C3AED]">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+              </svg>
+            </div>
+          </div>
+          <div *ngIf="isLoadingOverview" class="h-8 w-24 bg-gray-100 animate-pulse rounded-lg"></div>
+          <div *ngIf="!isLoadingOverview" class="text-3xl font-extrabold text-[#151C27]">
+            {{ (reportOverview?.totalCouponsGenerated || 0) | number }}
+          </div>
+          <p class="text-xs text-[#64748B]">For selected date range</p>
+        </div>
+      </div>
+
+      <!-- ── Filters Bar ── -->
+      <div class="bg-white border border-[#EEEEF4] rounded-2xl p-5 shadow-sm space-y-3">
+        <div class="flex flex-wrap items-end gap-3">
+          <!-- From Date -->
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">From Date</label>
+            <div class="flex items-center gap-1.5 bg-[#F9FAFB] border border-[#EEEEF4] rounded-xl px-3 py-2">
+              <svg class="w-3.5 h-3.5 text-[#64748B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <input type="date" [(ngModel)]="fromDate"
+                     class="bg-transparent text-xs font-semibold text-[#151C27] outline-none border-none" />
+            </div>
+          </div>
+
+          <!-- To Date -->
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">To Date</label>
+            <div class="flex items-center gap-1.5 bg-[#F9FAFB] border border-[#EEEEF4] rounded-xl px-3 py-2">
+              <svg class="w-3.5 h-3.5 text-[#64748B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <input type="date" [(ngModel)]="toDate"
+                     class="bg-transparent text-xs font-semibold text-[#151C27] outline-none border-none" />
+            </div>
+          </div>
+
+          <!-- Sort By -->
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Sort By</label>
+            <div class="flex items-center gap-1.5">
+              <select [(ngModel)]="sortBy"
+                      class="bg-[#F9FAFB] border border-[#EEEEF4] rounded-xl px-3 py-2 text-xs font-semibold text-[#151C27] outline-none cursor-pointer">
+                <option value="Date">Date</option>
+                <option value="Value">Value</option>
+              </select>
+              <!-- Direction Toggle -->
+              <button (click)="toggleDirection()"
+                      class="p-2 bg-[#F9FAFB] border border-[#EEEEF4] rounded-xl text-[#64748B] hover:text-[#7C3AED] hover:border-[#7C3AED]/30 transition-all"
+                      [title]="direction === 'Asc' ? 'Currently Ascending — click for Descending' : 'Currently Descending — click for Ascending'">
+                <svg class="w-4 h-4 transition-transform duration-200" [ngClass]="direction === 'Asc' ? 'rotate-180' : ''"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Apply Button -->
+          <button (click)="applyFilters()"
+                  class="px-5 py-2 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold transition-all shadow-sm self-end">
+            Apply
+          </button>
+
+          <!-- Clear Filters -->
+          <button *ngIf="fromDate || toDate"
+                  (click)="fromDate = ''; toDate = ''; filterError = ''; page = 1; fetchAll()"
+                  class="px-4 py-2 rounded-xl border border-[#EEEEF4] text-xs font-semibold text-[#64748B] hover:bg-gray-50 transition-all self-end">
+            Clear
+          </button>
+        </div>
+
+        <!-- Inline filter error -->
+        <div *ngIf="filterError" class="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-xl">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>{{ filterError }}</span>
+        </div>
+      </div>
+
+      <!-- ── Redemptions Table ── -->
+      <section class="bg-white border border-[#EEEEF4] rounded-2xl shadow-sm overflow-hidden">
+
+        <!-- Table Error Banner -->
+        <div *ngIf="tableError" class="p-4 bg-red-50 border-b border-red-200 text-red-600 text-sm flex items-center gap-2">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>{{ tableError }}</span>
+        </div>
+
+        <div class="overflow-x-auto min-h-[280px] relative">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-[#EEEEF4]/60 bg-[#F9FAFB]/50 text-[10px] font-bold text-[#64748B] uppercase tracking-wider">
+                <th class="p-4 pl-6">Created</th>
+                <th class="p-4">User ID</th>
+                <th class="p-4">Transaction ID</th>
+                <th class="p-4 pr-6 text-right">Pts / Value</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#EEEEF4]/40">
+
+              <!-- Skeleton loading rows -->
+              <ng-container *ngIf="isLoadingTable">
+                <tr *ngFor="let _ of skeletonRows" class="animate-pulse">
+                  <td class="p-4 pl-6">
+                    <div class="h-3 w-20 bg-gray-100 rounded mb-1.5"></div>
+                    <div class="h-2.5 w-12 bg-gray-100 rounded"></div>
+                  </td>
+                  <td class="p-4"><div class="h-3 w-28 bg-gray-100 rounded"></div></td>
+                  <td class="p-4"><div class="h-3 w-32 bg-gray-100 rounded"></div></td>
+                  <td class="p-4 pr-6 text-right">
+                    <div class="h-3 w-16 bg-gray-100 rounded ml-auto mb-1.5"></div>
+                    <div class="h-2.5 w-12 bg-gray-100 rounded ml-auto"></div>
+                  </td>
+                </tr>
+              </ng-container>
+
+              <!-- Actual data rows -->
+              <ng-container *ngIf="!isLoadingTable">
+                <tr *ngFor="let item of items"
+                    class="hover:bg-[#F9FAFB]/60 transition-colors text-sm text-[#151C27]">
+                  <!-- CREATED: date + time two-line -->
+                  <td class="p-4 pl-6">
+                    <div class="font-semibold text-xs text-[#151C27]">
+                      {{ item.createdAt | date:'MMM d, yyyy' }}
+                    </div>
+                    <div class="text-[11px] text-[#64748B] mt-0.5">
+                      {{ item.createdAt | date:'HH:mm' }}
+                    </div>
+                  </td>
+
+                  <!-- USER ID -->
+                  <td class="p-4">
+                    <span class="font-mono text-xs text-[#151C27] bg-gray-50 px-2 py-0.5 rounded-md border border-[#EEEEF4]">
+                      {{ item.userId }}
+                    </span>
+                  </td>
+
+                  <!-- TRANSACTION ID (couponCode) -->
+                  <td class="p-4">
+                    <span class="font-mono text-xs font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-100">
+                      {{ item.couponCode }}
+                    </span>
+                  </td>
+
+                  <!-- PTS / VALUE two-tone -->
+                  <td class="p-4 pr-6 text-right">
+                    <div class="font-bold text-sm text-[#7C3AED]">+{{ item.points | number }} pts</div>
+                    <div class="text-xs font-semibold text-emerald-600 mt-0.5">
+                      {{ item.value | currency:'USD':'symbol':'1.2-2' }}
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+
+          <!-- Empty State -->
+          <div *ngIf="!isLoadingTable && items.length === 0 && !tableError"
+               class="flex flex-col items-center justify-center py-16 px-4">
+            <div class="p-4 rounded-full bg-slate-50 border border-slate-100 text-slate-400 mb-4">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <h4 class="font-bold text-[#151C27] text-sm mb-1">No Redemptions Found</h4>
+            <p class="text-xs text-[#64748B] text-center max-w-xs">No redemptions found for this date range. Try adjusting your filters or check back later.</p>
+          </div>
+        </div>
+
+        <!-- ── Pagination Bar ── -->
+        <div *ngIf="!isLoadingTable && totalCount > 0"
+             class="p-4 border-t border-[#EEEEF4]/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+          <!-- Left: showing info + page size -->
+          <div class="flex items-center gap-3 text-xs text-[#64748B]">
+            <span>
+              Showing <strong class="text-[#151C27]">{{ showingStart }}&ndash;{{ showingEnd }}</strong>
+              of <strong class="text-[#151C27]">{{ totalCount }}</strong> redemptions
+            </span>
+            <span class="text-[#EEEEF4]">|</span>
+            <div class="flex items-center gap-1.5">
+              <span class="font-semibold text-[#64748B] uppercase tracking-wider text-[10px]">Per page</span>
+              <select [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange()"
+                      class="bg-[#F9FAFB] border border-[#EEEEF4] rounded-lg px-2 py-1 text-xs font-semibold text-[#151C27] outline-none cursor-pointer">
+                <option *ngFor="let opt of pageSizeOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Right: page buttons -->
+          <div class="flex items-center gap-1">
+            <!-- Prev -->
+            <button (click)="goToPage(page - 1)" [disabled]="page === 1"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg border border-[#EEEEF4] text-[#64748B] hover:bg-[#7C3AED]/5 hover:text-[#7C3AED] hover:border-[#7C3AED]/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </button>
+
+            <!-- Page numbers -->
+            <ng-container *ngFor="let p of pageNumbers">
+              <!-- Ellipsis -->
+              <span *ngIf="p === -1" class="w-8 h-8 flex items-center justify-center text-xs text-[#64748B]">…</span>
+              <!-- Page button -->
+              <button *ngIf="p !== -1"
+                      (click)="goToPage(p)"
+                      class="w-8 h-8 flex items-center justify-center rounded-lg border text-xs font-semibold transition-all"
+                      [ngClass]="p === page
+                        ? 'bg-[#7C3AED] border-[#7C3AED] text-white shadow-sm'
+                        : 'border-[#EEEEF4] text-[#64748B] hover:bg-[#7C3AED]/5 hover:text-[#7C3AED] hover:border-[#7C3AED]/30'">
+                {{ p }}
+              </button>
+            </ng-container>
+
+            <!-- Next -->
+            <button (click)="goToPage(page + 1)" [disabled]="page === totalPages"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg border border-[#EEEEF4] text-[#64748B] hover:bg-[#7C3AED]/5 hover:text-[#7C3AED] hover:border-[#7C3AED]/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <app-publisher-footer></app-publisher-footer>
+  </div>
+</div>

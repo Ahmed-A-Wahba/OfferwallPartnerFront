@@ -1,0 +1,387 @@
+<div class="flex min-h-screen bg-[#F9F9FF] font-inter">
+  <!-- 1. SIDEBAR NAVIGATION -->
+  <app-publisher-sidebar></app-publisher-sidebar>
+
+  <!-- 2. MAIN WORKSPACE CONTENT -->
+  <div class="flex-1 pl-64 flex flex-col min-h-screen">
+    <!-- Header Navigation Bar -->
+    <app-publisher-header title="Dashboard"></app-publisher-header>
+
+    <!-- Page Body Content -->
+    <main class="flex-1 p-8 space-y-8 max-w-7xl mx-auto w-full">
+      <!-- Header Banner / Loader -->
+      <div *ngIf="isLoadingOverview" class="w-full flex items-center justify-center py-6">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7C3AED]"></div>
+      </div>
+
+      <div *ngIf="overviewError"
+        class="w-full p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm flex items-center gap-2">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>{{ overviewError }}</span>
+      </div>
+
+      <!-- 3. METRICS CARDS ROW (Bento Grid) -->
+      <section *ngIf="overview" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <!-- Card 1: Coupons Generated -->
+        <div
+          class="bg-white border border-[#EEEEF4] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between min-h-[140px]">
+          <span class="text-xs font-semibold text-[#64748B] uppercase tracking-wider">Coupons Generated</span>
+          <div class="mt-2 flex items-baseline gap-1">
+            <span class="text-3xl font-extrabold text-[#151C27]">{{ overview.couponsGenerated | number }}</span>
+          </div>
+          <div class="mt-2 text-xs text-[#64748B]/70">Lifetime counts</div>
+        </div>
+
+        <!-- Card 2: Coupons Redeemed -->
+        <div
+          class="bg-white border border-[#EEEEF4] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between min-h-[140px]">
+          <span class="text-xs font-semibold text-[#64748B] uppercase tracking-wider">Coupons Redeemed</span>
+          <div class="mt-2 flex items-baseline gap-1">
+            <span class="text-3xl font-extrabold text-[#151C27]">{{ overview.couponsRedeemed | number }}</span>
+          </div>
+          <div class="mt-2 text-xs text-[#64748B]/70">Redeemed loyalty rewards</div>
+        </div>
+
+        <!-- Card 3: Total Paid -->
+        <div
+          class="bg-white border border-[#EEEEF4] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between min-h-[140px]">
+          <span class="text-xs font-semibold text-[#64748B] uppercase tracking-wider">Total Paid</span>
+          <div class="mt-2 flex items-baseline gap-1">
+            <span class="text-3xl font-extrabold text-[#006C4A]">{{ overview.totalPaid | currency:'USD':'symbol':'1.2-2'
+              }}</span>
+          </div>
+          <div class="mt-2 text-xs text-[#006C4A]/80 font-medium">Transferred settlements</div>
+        </div>
+
+        <!-- Card 4: Monthly Earnings & Chargebacks -->
+        <div
+          class="bg-white border border-[#EEEEF4] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between min-h-[140px]">
+          <span class="text-xs font-semibold text-[#64748B] uppercase tracking-wider">Total This Month</span>
+          <div class="mt-2 flex items-baseline gap-1">
+            <span class="text-3xl font-extrabold text-[#006C4A]">{{ overview.totalInThisMonth |
+              currency:'USD':'symbol':'1.2-2' }}</span>
+          </div>
+          <!-- Chargebacks sub-row -->
+          <div class="mt-2 pt-2 border-t border-[#EEEEF4]/40 flex items-center justify-between text-xs">
+            <span class="text-[#64748B]">Chargebacks:</span>
+            <span [ngClass]="overview.chargebacks > 0 ? 'text-red-500 font-bold' : 'text-[#64748B]'">
+              {{ overview.chargebacks | currency:'USD':'symbol':'1.2-2' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Card 5: Pending Settlements -->
+        <div
+          class="bg-white border border-[#EEEEF4] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between min-h-[140px]">
+          <span class="text-xs font-semibold text-[#64748B] uppercase tracking-wider">Pending Settlements</span>
+          <div class="mt-2 flex items-baseline gap-1">
+            <span class="text-3xl font-extrabold text-[#D97706]">{{ overview.pendingSettlements |
+              currency:'USD':'symbol':'1.2-2' }}</span>
+          </div>
+          <div class="mt-2 text-xs text-[#64748B]/70">Processing payouts</div>
+        </div>
+      </section>
+
+      <!-- 4. PERFORMANCE CHART CARD & FILTERS -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Performance Overview Line Chart -->
+        <div class="bg-white border border-[#EEEEF4] rounded-2xl p-6 shadow-sm flex flex-col lg:col-span-2 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 class="font-sora font-bold text-lg text-[#151C27]">Performance Overview</h3>
+              <p class="text-xs text-[#64748B]">Track coupon activity over your selected date range</p>
+            </div>
+
+            <!-- Dates Filter Panel -->
+            <div class="flex items-center gap-2 text-xs">
+              <div class="flex items-center gap-1 bg-[#F9FAFB] border border-[#EEEEF4] rounded-lg px-2 py-1.5">
+                <span class="text-[#64748B]">From:</span>
+                <input type="date" [(ngModel)]="chartFromDate"
+                  class="bg-transparent text-[#151C27] font-semibold outline-none border-none w-28" />
+              </div>
+              <div class="flex items-center gap-1 bg-[#F9FAFB] border border-[#EEEEF4] rounded-lg px-2 py-1.5">
+                <span class="text-[#64748B]">To:</span>
+                <input type="date" [(ngModel)]="chartToDate"
+                  class="bg-transparent text-[#151C27] font-semibold outline-none border-none w-28" />
+              </div>
+              <button (click)="applyChartFilters()"
+                class="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-medium px-3 py-1.5 rounded-lg transition-colors duration-200">
+                Apply
+              </button>
+            </div>
+          </div>
+
+          <!-- Interactive Legend Info -->
+          <div class="flex gap-6 text-xs font-medium border-b border-[#EEEEF4]/40 pb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded bg-[#7C3AED]/20 border border-[#7C3AED]"></span>
+              <span class="text-[#64748B]">Generated:</span>
+              <span class="font-bold text-[#151C27]">{{ chartGeneratedTotal | number }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded bg-[#10B981]/20 border border-[#10B981]"></span>
+              <span class="text-[#64748B]">Redeemed:</span>
+              <span class="font-bold text-[#151C27]">{{ chartRedeemedTotal | number }}</span>
+            </div>
+          </div>
+
+          <!-- Chart Area -->
+          <div class="relative h-[280px] w-full">
+            <div *ngIf="isLoadingChart" class="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7C3AED]"></div>
+            </div>
+            <canvas #performanceChart></canvas>
+          </div>
+        </div>
+
+        <!-- 5. QUICK ACTIONS CARD -->
+        <div class="bg-white border border-[#EEEEF4] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 class="font-sora font-bold text-lg text-[#151C27]">Quick Actions</h3>
+            <p class="text-xs text-[#64748B] mb-6">Common operations and API configuration utilities</p>
+
+            <!-- Export Error Banner -->
+            <div *ngIf="exportError"
+              class="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>{{ exportError }}</span>
+              </div>
+              <button type="button" (click)="exportError = ''"
+                class="text-red-400 hover:text-red-600 text-sm font-bold">&times;</button>
+            </div>
+
+            <div class="space-y-3">
+              <!-- Action 1: Export CSV -->
+              <button type="button" (click)="onExportPerformance()" [disabled]="isExporting"
+                class="w-full flex items-center justify-between p-4 rounded-xl border border-[#EEEEF4] hover:bg-[#7C3AED]/5 hover:border-[#7C3AED]/30 transition-all duration-200 group text-left disabled:opacity-50 disabled:cursor-not-allowed">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="p-2.5 rounded-lg bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100 transition-colors flex items-center justify-center">
+                    <svg *ngIf="!isExporting" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    <div *ngIf="isExporting" class="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-600">
+                    </div>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-bold text-[#151C27]">Export Performance</h4>
+                    <p class="text-[11px] text-[#64748B]">{{ isExporting ? 'Generating CSV...' : 'Download analytics
+                      data to CSV' }}</p>
+                  </div>
+                </div>
+                <svg class="w-4 h-4 text-[#64748B] group-hover:translate-x-1 transition-transform" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+
+              <!-- Action 2: API Documentation -->
+              <button type="button" (click)="onOpenApiDocs()"
+                class="w-full flex items-center justify-between p-4 rounded-xl border border-[#EEEEF4] hover:bg-[#7C3AED]/5 hover:border-[#7C3AED]/30 transition-all duration-200 group text-left">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="p-2.5 rounded-lg bg-[#7C3AED]/5 text-[#7C3AED] group-hover:bg-[#7C3AED]/10 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                      </path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-bold text-[#151C27]">API Documentation</h4>
+                    <p class="text-[11px] text-[#64748B]">Developer endpoints & structures</p>
+                  </div>
+                </div>
+                <svg class="w-4 h-4 text-[#64748B] group-hover:translate-x-1 transition-transform" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+
+              <!-- Action 3: API Keys & Webhooks -->
+              <button type="button" (click)="onNavigateToApiKeys()"
+                class="w-full flex items-center justify-between p-4 rounded-xl border border-[#EEEEF4] hover:bg-[#7C3AED]/5 hover:border-[#7C3AED]/30 transition-all duration-200 group text-left">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="p-2.5 rounded-lg bg-purple-50 text-purple-600 group-hover:bg-purple-100 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z">
+                      </path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-bold text-[#151C27]">API Keys</h4>
+                    <p class="text-[11px] text-[#64748B]">Manage security integrations</p>
+                  </div>
+                </div>
+                <svg class="w-4 h-4 text-[#64748B] group-hover:translate-x-1 transition-transform" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Tip -->
+          <div class="mt-6 p-4 bg-[#F9F9FF] border border-[#EEEEF4] rounded-xl flex gap-3 text-xs">
+            <svg class="w-5 h-5 text-[#7C3AED] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span class="text-[#64748B]">Need to integrate into your online store? Head over to the <b>iFrame
+                Integration</b> tab for dynamic copy-paste widgets.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. PERFORMANCE BY OFFER TABLE SECTION -->
+      <section class="bg-white border border-[#EEEEF4] rounded-2xl shadow-sm overflow-hidden">
+        <!-- Table Toolbar -->
+        <div class="p-6 border-b border-[#EEEEF4]/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h3 class="font-sora font-bold text-lg text-[#151C27]">Performance by Offer</h3>
+            <p class="text-xs text-[#64748B]">Detailed breakdown of customer conversions and revenue</p>
+          </div>
+
+          <!-- Date Filters and Controls -->
+          <div class="flex flex-wrap items-center gap-3 text-xs">
+            <div class="flex items-center gap-1 bg-[#F9FAFB] border border-[#EEEEF4] rounded-lg px-2.5 py-1.5">
+              <span class="text-[#64748B]">From:</span>
+              <input type="date" [(ngModel)]="tableFromDate"
+                class="bg-transparent text-[#151C27] font-semibold outline-none border-none w-28" />
+            </div>
+            <div class="flex items-center gap-1 bg-[#F9FAFB] border border-[#EEEEF4] rounded-lg px-2.5 py-1.5">
+              <span class="text-[#64748B]">To:</span>
+              <input type="date" [(ngModel)]="tableToDate"
+                class="bg-transparent text-[#151C27] font-semibold outline-none border-none w-28" />
+            </div>
+            <button (click)="applyTableFilters()"
+              class="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-medium px-4 py-1.5 rounded-lg transition-colors duration-200">
+              Update
+            </button>
+          </div>
+        </div>
+
+        <!-- Table Content -->
+        <div class="relative overflow-x-auto min-h-[220px]">
+          <div *ngIf="isLoadingTable" class="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7C3AED]"></div>
+          </div>
+
+          <table *ngIf="!isLoadingTable && offers.length > 0" class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-[#EEEEF4]/60 bg-[#F9FAFB]/50 text-xs font-semibold text-[#64748B] select-none">
+                <th class="p-4 pl-6 cursor-pointer hover:text-[#7C3AED] transition-colors"
+                  (click)="onSortChange('OfferName')">
+                  <div class="flex items-center gap-1.5">
+                    <span>Offer</span>
+                    <svg *ngIf="tableSortBy === 'OfferName'" class="w-3.5 h-3.5 transition-transform"
+                      [ngClass]="tableSortDirection === 'Ascending' ? 'rotate-180' : ''" fill="none"
+                      stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                </th>
+                <th class="p-4 cursor-pointer hover:text-[#7C3AED] transition-colors"
+                  (click)="onSortChange('Generated')">
+                  <div class="flex items-center gap-1.5">
+                    <span>Clicks</span>
+                    <svg *ngIf="tableSortBy === 'Generated'" class="w-3.5 h-3.5 transition-transform"
+                      [ngClass]="tableSortDirection === 'Ascending' ? 'rotate-180' : ''" fill="none"
+                      stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                </th>
+                <th class="p-4 cursor-pointer hover:text-[#7C3AED] transition-colors"
+                  (click)="onSortChange('Redeemed')">
+                  <div class="flex items-center gap-1.5">
+                    <span>Conversions</span>
+                    <svg *ngIf="tableSortBy === 'Redeemed'" class="w-3.5 h-3.5 transition-transform"
+                      [ngClass]="tableSortDirection === 'Ascending' ? 'rotate-180' : ''" fill="none"
+                      stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                </th>
+                <th class="p-4 pr-6 cursor-pointer hover:text-[#7C3AED] transition-colors"
+                  (click)="onSortChange('Revenue')">
+                  <div class="flex items-center gap-1.5">
+                    <span>Earnings</span>
+                    <svg *ngIf="tableSortBy === 'Revenue'" class="w-3.5 h-3.5 transition-transform"
+                      [ngClass]="tableSortDirection === 'Ascending' ? 'rotate-180' : ''" fill="none"
+                      stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#EEEEF4]/40 text-sm text-[#151C27]">
+              <tr *ngFor="let item of offers" class="hover:bg-[#F9FAFB]/40 transition-colors">
+                <!-- Offer Image/Logo and Name -->
+                <td class="p-4 pl-6">
+                  <div class="flex items-center gap-3">
+                    <img *ngIf="item.offerLogoUrl" [src]="item.offerLogoUrl" alt="Offer logo"
+                      class="w-9 h-9 rounded-xl border border-[#EEEEF4] object-contain bg-white p-1"
+                      (error)="onImageError($event)" />
+                    <span class="font-bold text-[#151C27]">{{ item.offerName }}</span>
+                  </div>
+                </td>
+                <td class="p-4 font-semibold">{{ item.clicks | number }}</td>
+                <td class="p-4">
+                  <span class="font-semibold">{{ item.conversions | number }}</span>
+                </td>
+                <td class="p-4 pr-6 font-bold text-[#006C4A]">
+                  {{ item.earnings | currency:'USD':'symbol':'1.2-2' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Empty State -->
+          <div *ngIf="!isLoadingTable && offers.length === 0"
+            class="flex flex-col items-center justify-center py-16 px-4">
+            <div class="p-4 rounded-full bg-slate-50 border border-slate-100 text-slate-400 mb-4">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                </path>
+              </svg>
+            </div>
+            <h4 class="font-bold text-[#151C27] mb-1">No Performance Data</h4>
+            <p class="text-xs text-[#64748B] mb-6 text-center max-w-[280px]">We couldn't find any offer metrics for the
+              selected date range.</p>
+            <button (click)="showApiDocs()"
+              class="inline-flex items-center gap-1 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors duration-200">
+              <span>View Documentation</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3">
+                </path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <app-publisher-footer></app-publisher-footer>
+  </div>
+</div>
