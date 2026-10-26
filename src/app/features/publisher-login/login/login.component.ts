@@ -6,7 +6,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { PartnerAuthService, parseLoginError } from '../services/partner-auth.service';
 
-const API_URL = 'http://localhost:5084';
+const API_URL = 'https://winfloos.runasp.net';
 
 @Component({
   selector: 'app-login',

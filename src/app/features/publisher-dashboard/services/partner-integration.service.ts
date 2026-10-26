@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-const API_URL = 'http://localhost:5084';
+const API_URL = 'https://winfloos.runasp.net';
 
 export interface IntegrationResponse {
   publisherId: string;
