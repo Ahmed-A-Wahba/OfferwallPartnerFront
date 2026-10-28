@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-const API_URL = 'https://winfloos.runasp.net';
+const API_URL = '';
 
 export interface RedemptionOverviewResponse {
   totalRedeemedUsd: number;

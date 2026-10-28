@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-const API_URL = 'https://winfloos.runasp.net';
+const API_URL = '';
 
 export interface SignupData {
   fullName: string;

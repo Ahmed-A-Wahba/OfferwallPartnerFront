@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 
-const API_URL = 'https://winfloos.runasp.net';
+const API_URL = '';
 
 export interface LoginResponse {
   accessToken: string;
