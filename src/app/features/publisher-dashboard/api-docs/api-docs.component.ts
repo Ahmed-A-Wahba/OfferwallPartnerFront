@@ -45,6 +45,8 @@ export class PartnerApiDocsComponent {
   // ── Code snippets ─────────────────────────────────────────────────────────
   readonly ENDPOINT = 'https://winfloos.runasp.net/api/partner/coupons/redeem';
   readonly WEBHOOK_IPS = ['34.118.33.53', '138.68.125.171', '64.226.93.56', '74.220.53.15', '74.220.53.234', '74.220.53.235'];
+  readonly REQUEST_BODY_EXAMPLE = '{\n  "code": "CPN-A1B2C3D4"\n}';
+  readonly RESPONSE_EXAMPLE = '{\n  "couponId": "018f3a5b-...",\n  "code": "CPN-A1B2C3D4",\n  "usdValue": 10.00,\n  "userId": "018f3a5b-...",\n  "countryCode": "EG",\n  "status": "Redeemed",\n  "createdAt": "2026-10-28T12:00:00Z",\n  "redeemedAt": "2026-10-28T12:05:00Z"\n}';
 
   // S2S Auth snippets
   readonly authSnippets: Record<CodeLang, string> = {
