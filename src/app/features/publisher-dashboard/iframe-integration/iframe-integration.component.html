@@ -298,7 +298,7 @@
           <!-- Partner ID display -->
           <div class="pt-4 border-t border-[#EEEEF4] flex items-center gap-3 flex-wrap">
             <span class="text-xs font-semibold text-[#64748B]">Publisher ID (pub_id):</span>
-            <code class="text-xs font-mono text-[#7C3AED] bg-purple-50 border border-purple-100 px-3 py-1 rounded-lg">{{ integrationData?.publisherId || '—' }}</code>
+            <code class="text-xs font-mono text-[#7C3AED] bg-purple-50 border border-purple-100 px-3 py-1 rounded-lg">{{ integrationData?.partnerId || '—' }}</code>
           </div>
         </section>
 
@@ -583,7 +583,7 @@ Content-Type: application/json
                   <td class="p-4">
                     <span class="px-2.5 py-0.5 bg-red-50 text-red-600 border border-red-200 font-bold rounded-md uppercase tracking-wider text-[10px]">REQUIRED</span>
                   </td>
-                  <td class="p-4 pr-6 text-[#64748B]">Your unique partner publisher identifier (<code class="font-mono text-gray-800">{{ integrationData?.publisherId }}</code>)</td>
+                  <td class="p-4 pr-6 text-[#64748B]">Your unique partner publisher identifier (<code class="font-mono text-gray-800">{{ integrationData?.partnerId }}</code>)</td>
                 </tr>
                 <tr class="hover:bg-[#F9FAFB]/40 transition-colors">
                   <td class="p-4 pl-6 font-mono font-bold text-purple-700">user_id</td>

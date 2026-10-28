@@ -197,17 +197,17 @@ export class IframeIntegrationComponent implements OnInit, OnDestroy {
 
   // Offer Wall URL & Embed Code Generators
   get offerWallUrl(): string {
-    const pubId = this.integrationData?.publisherId || 'PUBLISHER_ID';
+    const pubId = this.integrationData?.partnerId || 'PUBLISHER_ID';
     return `https://offerwall.nexus.com/wall?pub_id=${pubId}&user_id=USER_ID`;
   }
 
   get embedCodeSnippet(): string {
-    const pubId = this.integrationData?.publisherId || 'PUBLISHER_ID';
+    const pubId = this.integrationData?.partnerId || 'PUBLISHER_ID';
     return `<iframe\n  src="https://offerwall.nexus.com/wall?pub_id=${pubId}&user_id=USER_ID"\n  width="100%"\n  height="800"\n  frameborder="0">\n</iframe>`;
   }
 
   get previewIframeUrl(): SafeResourceUrl {
-    const pubId = this.integrationData?.publisherId || 'PUBLISHER_ID';
+    const pubId = this.integrationData?.partnerId || 'PUBLISHER_ID';
     const rawUrl = `https://offerwall.nexus.com/wall?pub_id=${pubId}&user_id=${encodeURIComponent(
       this.previewUserId
     )}`;
@@ -338,7 +338,7 @@ export class IframeIntegrationComponent implements OnInit, OnDestroy {
   }
 
   openPreviewInNewTab(): void {
-    const pubId = this.integrationData?.publisherId || 'PUBLISHER_ID';
+    const pubId = this.integrationData?.partnerId || 'PUBLISHER_ID';
     const url = `https://offerwall.nexus.com/wall?pub_id=${pubId}&user_id=${encodeURIComponent(
       this.previewUserId
     )}`;

@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 const API_URL = 'https://winfloos.runasp.net';
 
 export interface IntegrationResponse {
-  publisherId: string;
+  partnerId: string;
   apiKey: string;
   apiSecret: string;
   pointsPerUsd: number;
