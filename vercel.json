@@ -1,8 +1,8 @@
 {
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://winfloos.runasp.net/api/:path*"
-    }
+    { "source": "/api/:path*",      "destination": "https://winfloos.runasp.net/api/:path*" },
+    { "source": "/partners/:path*", "destination": "https://winfloos.runasp.net/partners/:path*" },
+    { "source": "/partner/:path*",  "destination": "https://winfloos.runasp.net/partner/:path*" },
+    { "source": "/admin/:path*",    "destination": "https://winfloos.runasp.net/admin/:path*" }
   ]
 }

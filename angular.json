@@ -87,7 +87,8 @@
               "buildTarget": "OfferwallFront:build:production"
             },
             "development": {
-              "buildTarget": "OfferwallFront:build:development"
+              "buildTarget": "OfferwallFront:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

@@ -1,0 +1,26 @@
+{
+  "/api": {
+    "target": "https://winfloos.runasp.net",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/partners": {
+    "target": "https://winfloos.runasp.net",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/partner": {
+    "target": "https://winfloos.runasp.net",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/admin": {
+    "target": "https://winfloos.runasp.net",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
