@@ -4,6 +4,7 @@ import { IframeIntegrationComponent } from './iframe-integration/iframe-integrat
 import { RedemptionsComponent } from './redemptions/redemptions.component';
 import { PayoutsComponent } from './payouts/payouts.component';
 import { SettingsComponent } from './settings/settings.component';
+import { PartnerApiDocsComponent } from './api-docs/api-docs.component';
 
 export const dashboardRoutes: Routes = [
   { path: '', component: DashboardComponent },
@@ -11,4 +12,5 @@ export const dashboardRoutes: Routes = [
   { path: 'reports/redemptions', component: RedemptionsComponent },
   { path: 'payouts', component: PayoutsComponent },
   { path: 'settings', component: SettingsComponent },
+  { path: 'docs', component: PartnerApiDocsComponent },
 ];

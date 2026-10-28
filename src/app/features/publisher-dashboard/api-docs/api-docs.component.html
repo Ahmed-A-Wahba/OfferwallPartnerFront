@@ -1,0 +1,467 @@
+<!-- ─── TOAST NOTIFICATIONS ─────────────────────────────────────────────── -->
+<div class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none">
+  <div *ngFor="let t of toasts"
+    class="toast-anim pointer-events-auto flex items-center gap-3 bg-emerald-950/95 border border-emerald-500/40 text-emerald-200 text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl backdrop-blur-md">
+    <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+    </svg>
+    {{ t.message }}
+  </div>
+</div>
+
+<div class="flex min-h-screen bg-[#F9F9FF] font-inter">
+
+  <!-- ─── SIDEBAR ──────────────────────────────────────────────────────────── -->
+  <app-publisher-sidebar></app-publisher-sidebar>
+
+  <!-- ─── MAIN WORKSPACE ──────────────────────────────────────────────────── -->
+  <div class="flex-1 pl-64 flex flex-col min-h-screen">
+    <app-publisher-header title="API Documentation"></app-publisher-header>
+
+    <div class="flex flex-1 gap-0">
+
+      <!-- ── LEFT DOC NAV (sticky) ──────────────────────────────────────── -->
+      <aside class="hidden xl:block w-56 shrink-0">
+        <div class="sticky top-[64px] p-6 space-y-1">
+          <p class="text-[10px] font-bold text-[#64748B] uppercase tracking-widest mb-3">On this page</p>
+
+          <button (click)="scrollTo('section-auth')"
+            class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#64748B] hover:bg-[#7C3AED]/5 hover:text-[#7C3AED] transition-colors">
+            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+            </svg>
+            S2S Authentication
+          </button>
+
+          <button (click)="scrollTo('section-redeem')"
+            class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#64748B] hover:bg-[#7C3AED]/5 hover:text-[#7C3AED] transition-colors">
+            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            Coupon Redemption
+          </button>
+
+          <button (click)="scrollTo('section-errors')"
+            class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#64748B] hover:bg-[#7C3AED]/5 hover:text-[#7C3AED] transition-colors">
+            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Error Codes
+          </button>
+
+          <button (click)="scrollTo('section-webhook')"
+            class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#64748B] hover:bg-[#7C3AED]/5 hover:text-[#7C3AED] transition-colors">
+            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            Webhooks
+          </button>
+        </div>
+      </aside>
+
+      <!-- ── CONTENT AREA ───────────────────────────────────────────────── -->
+      <main class="flex-1 min-w-0 p-8 space-y-10 max-w-4xl">
+
+        <!-- Page header -->
+        <div class="space-y-2 border-b border-[#EEEEF4] pb-6">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-md font-mono">v1.0</span>
+            <span class="text-xs text-[#64748B]">Base URL: <code class="font-mono text-[#7C3AED] bg-purple-50 px-1.5 py-0.5 rounded">https://winfloos.runasp.net</code></span>
+          </div>
+          <h1 class="font-sora font-extrabold text-3xl text-[#151C27] tracking-tight">Partner API Reference</h1>
+          <p class="text-sm text-[#64748B] max-w-xl">Complete reference for the Nexus Offerwall Server-to-Server API. All endpoints require Basic Authentication using your <strong>ApiKey</strong> and <strong>ApiSecret</strong>.</p>
+        </div>
+
+        <!-- ════════════════════════════════════════════════════════════════
+             SECTION 1 — S2S Authentication
+        ════════════════════════════════════════════════════════════════ -->
+        <section id="section-auth" class="section-anchor space-y-5">
+          <!-- Section heading -->
+          <div class="flex items-center gap-3 pb-2 border-b border-[#EEEEF4]">
+            <div class="p-1.5 bg-purple-50 rounded-lg">
+              <svg class="w-4 h-4 text-[#7C3AED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+              </svg>
+            </div>
+            <h2 class="font-sora font-bold text-xl text-[#151C27]">S2S Authentication</h2>
+          </div>
+
+          <p class="text-sm text-[#64748B] leading-relaxed">
+            All server-to-server requests use <strong>HTTP Basic Authentication</strong>. Concatenate your <code class="font-mono text-purple-700 bg-purple-50 px-1 rounded text-xs">ApiKey</code> and <code class="font-mono text-purple-700 bg-purple-50 px-1 rounded text-xs">ApiSecret</code> with a colon, Base64-encode the result, and pass it as the <code class="font-mono text-purple-700 bg-purple-50 px-1 rounded text-xs">Authorization</code> header.
+          </p>
+
+          <!-- Auth header format card -->
+          <div class="bg-[#151C27] rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
+            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-700/60">
+              <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">HTTP Header Format</span>
+              <button (click)="copy('Authorization: Basic Base64(ApiKey:ApiSecret)', 'Header format copied!')"
+                class="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                Copy
+              </button>
+            </div>
+            <div class="p-5">
+              <pre class="text-purple-300 font-mono"><span class="text-gray-500">Authorization: </span><span class="text-emerald-300">Basic</span> <span class="text-yellow-300">Base64(ApiKey:ApiSecret)</span></pre>
+            </div>
+          </div>
+
+          <!-- Info boxes -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-purple-50 border border-purple-200 rounded-xl">
+              <p class="text-xs font-bold text-purple-800 mb-1">🔑 ApiKey (Public)</p>
+              <p class="text-xs text-purple-700">Identifies your partner account. Format: <code class="font-mono">pk_live_...</code></p>
+            </div>
+            <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+              <p class="text-xs font-bold text-amber-800 mb-1">🔐 ApiSecret (Private)</p>
+              <p class="text-xs text-amber-700">Authenticates your request. Format: <code class="font-mono">sk_live_...</code> — <strong>never expose client-side</strong>.</p>
+            </div>
+          </div>
+
+          <!-- Code tabs -->
+          <div class="bg-[#151C27] rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
+            <!-- Tab bar -->
+            <div class="flex items-center border-b border-gray-700/60 px-2 pt-2 gap-1 overflow-x-auto">
+              <button *ngFor="let lang of langs" (click)="authTab = lang"
+                class="px-4 py-2 text-xs font-semibold rounded-t-lg transition-colors relative whitespace-nowrap"
+                [class.bg-gray-800]="authTab === lang"
+                [class.text-white]="authTab === lang"
+                [class.lang-tab-active]="authTab === lang"
+                [class.text-gray-500]="authTab !== lang"
+                [class.hover:text-gray-300]="authTab !== lang">
+                {{ langLabels[lang] }}
+              </button>
+              <div class="flex-1"></div>
+              <button (click)="copy(authSnippets[authTab], langLabels[authTab] + ' snippet copied!')"
+                class="shrink-0 flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors px-3 py-2 mb-1 rounded-lg hover:bg-gray-700/50">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                Copy
+              </button>
+            </div>
+            <!-- Code -->
+            <div class="p-5">
+              <pre class="text-emerald-300 font-mono">{{ authSnippets[authTab] }}</pre>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ════════════════════════════════════════════════════════════════
+             SECTION 2 — Coupon Redemption API
+        ════════════════════════════════════════════════════════════════ -->
+        <section id="section-redeem" class="section-anchor space-y-5">
+          <div class="flex items-center gap-3 pb-2 border-b border-[#EEEEF4]">
+            <div class="p-1.5 bg-emerald-50 rounded-lg">
+              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+            </div>
+            <h2 class="font-sora font-bold text-xl text-[#151C27]">Coupon Redemption API</h2>
+          </div>
+
+          <p class="text-sm text-[#64748B] leading-relaxed">
+            Validates and atomically redeems a user coupon code. A coupon can only be redeemed once.
+            Always call from your <strong>server backend</strong> — never from client-side code.
+          </p>
+
+          <!-- Endpoint pill -->
+          <div class="flex items-center gap-3 flex-wrap">
+            <span class="px-3 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg font-mono tracking-wide">POST</span>
+            <div class="flex items-center flex-1 min-w-0 bg-[#F9FAFB] border border-[#EEEEF4] rounded-xl px-4 py-2.5 gap-3">
+              <code class="text-xs font-mono text-[#151C27] truncate flex-1">/api/partner/coupons/redeem</code>
+              <button (click)="copy(ENDPOINT, 'Endpoint URL copied!')"
+                class="shrink-0 flex items-center gap-1.5 text-xs text-[#64748B] hover:text-[#7C3AED] transition-colors font-semibold">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                Copy URL
+              </button>
+            </div>
+          </div>
+
+          <!-- Request / Response side by side -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Request -->
+            <div class="bg-[#151C27] rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
+              <div class="flex items-center justify-between px-5 py-3 border-b border-gray-700/60">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-gray-400">REQUEST BODY</span>
+                  <span class="text-[10px] px-2 py-0.5 bg-gray-700 text-gray-300 rounded font-mono">application/json</span>
+                </div>
+                <button (click)="copy('{\n  \"code\": \"CPN-A1B2C3D4\"\n}', 'Request body copied!')"
+                  class="text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <div class="p-5">
+                <pre class="text-purple-300 font-mono">&#123;
+  <span class="text-sky-300">"code"</span>: <span class="text-emerald-300">"CPN-A1B2C3D4"</span>
+&#125;</pre>
+              </div>
+            </div>
+
+            <!-- Response 200 -->
+            <div class="bg-[#151C27] rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
+              <div class="flex items-center justify-between px-5 py-3 border-b border-gray-700/60">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-gray-400">RESPONSE</span>
+                  <span class="text-[10px] px-2 py-0.5 bg-emerald-900/60 text-emerald-300 border border-emerald-500/30 rounded font-mono font-bold">200 OK</span>
+                </div>
+                <button (click)="copy('{\n  \"couponId\": \"018f3a5b-...\",\n  \"code\": \"CPN-A1B2C3D4\",\n  \"usdValue\": 10.00,\n  \"userId\": \"018f3a5b-...\",\n  \"countryCode\": \"EG\",\n  \"status\": \"Redeemed\",\n  \"createdAt\": \"2026-10-28T12:00:00Z\",\n  \"redeemedAt\": \"2026-10-28T12:05:00Z\"\n}', 'Response copied!')"
+                  class="text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <div class="p-5">
+                <pre class="text-emerald-300 font-mono">&#123;
+  <span class="text-sky-300">"couponId"</span>:    <span class="text-yellow-200">"018f3a5b-..."</span>,
+  <span class="text-sky-300">"code"</span>:        <span class="text-yellow-200">"CPN-A1B2C3D4"</span>,
+  <span class="text-sky-300">"usdValue"</span>:    <span class="text-orange-300">10.00</span>,
+  <span class="text-sky-300">"userId"</span>:      <span class="text-yellow-200">"018f3a5b-..."</span>,
+  <span class="text-sky-300">"countryCode"</span>: <span class="text-yellow-200">"EG"</span>,
+  <span class="text-sky-300">"status"</span>:      <span class="text-emerald-300">"Redeemed"</span>,
+  <span class="text-sky-300">"createdAt"</span>:   <span class="text-yellow-200">"2026-10-28T12:00:00Z"</span>,
+  <span class="text-sky-300">"redeemedAt"</span>:  <span class="text-yellow-200">"2026-10-28T12:05:00Z"</span>
+&#125;</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- usdValue note -->
+          <div class="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div class="text-xs text-blue-800 leading-relaxed">
+              <strong>Important:</strong> Use <code class="font-mono bg-blue-100 px-1 rounded">usdValue</code> as the discount amount to apply in your checkout.
+              Only apply the discount after receiving a <strong>200 OK</strong> response. The redemption is <strong>atomic</strong> — each code can only be used once.
+            </div>
+          </div>
+
+          <!-- Code tabs -->
+          <div class="bg-[#151C27] rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
+            <div class="flex items-center border-b border-gray-700/60 px-2 pt-2 gap-1 overflow-x-auto">
+              <button *ngFor="let lang of langs" (click)="redeemTab = lang"
+                class="px-4 py-2 text-xs font-semibold rounded-t-lg transition-colors relative whitespace-nowrap"
+                [class.bg-gray-800]="redeemTab === lang"
+                [class.text-white]="redeemTab === lang"
+                [class.lang-tab-active]="redeemTab === lang"
+                [class.text-gray-500]="redeemTab !== lang">
+                {{ langLabels[lang] }}
+              </button>
+              <div class="flex-1"></div>
+              <button (click)="copy(redeemSnippets[redeemTab], langLabels[redeemTab] + ' snippet copied!')"
+                class="shrink-0 flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors px-3 py-2 mb-1 rounded-lg hover:bg-gray-700/50">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                Copy
+              </button>
+            </div>
+            <div class="p-5">
+              <pre class="text-emerald-300 font-mono">{{ redeemSnippets[redeemTab] }}</pre>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ════════════════════════════════════════════════════════════════
+             SECTION 3 — Error Codes
+        ════════════════════════════════════════════════════════════════ -->
+        <section id="section-errors" class="section-anchor space-y-5">
+          <div class="flex items-center gap-3 pb-2 border-b border-[#EEEEF4]">
+            <div class="p-1.5 bg-red-50 rounded-lg">
+              <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h2 class="font-sora font-bold text-xl text-[#151C27]">Error Codes</h2>
+          </div>
+
+          <p class="text-sm text-[#64748B]">All errors follow <strong>RFC 7807 ProblemDetails</strong> format with a <code class="font-mono text-purple-700 bg-purple-50 px-1 rounded text-xs">detail</code> and <code class="font-mono text-purple-700 bg-purple-50 px-1 rounded text-xs">extensions.code</code> field.</p>
+
+          <!-- Error response example -->
+          <div class="bg-[#151C27] rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
+            <div class="px-5 py-3 border-b border-gray-700/60">
+              <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Error Response Shape</span>
+            </div>
+            <div class="p-5">
+              <pre class="text-red-300 font-mono">&#123;
+  <span class="text-sky-300">"type"</span>:   <span class="text-yellow-200">"https://tools.ietf.org/html/rfc7807"</span>,
+  <span class="text-sky-300">"title"</span>:  <span class="text-yellow-200">"Coupon.AlreadyRedeemed"</span>,
+  <span class="text-sky-300">"status"</span>: <span class="text-orange-300">409</span>,
+  <span class="text-sky-300">"detail"</span>: <span class="text-yellow-200">"This coupon has already been used."</span>,
+  <span class="text-sky-300">"extensions"</span>: &#123; <span class="text-sky-300">"code"</span>: <span class="text-yellow-200">"Coupon.AlreadyRedeemed"</span> &#125;
+&#125;</pre>
+            </div>
+          </div>
+
+          <!-- Error table -->
+          <div class="rounded-2xl border border-[#EEEEF4] overflow-hidden">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-[#F9FAFB] text-[#64748B] font-semibold uppercase tracking-wider border-b border-[#EEEEF4]">
+                  <th class="p-4 pl-5">Status</th>
+                  <th class="p-4">Code</th>
+                  <th class="p-4">Meaning</th>
+                  <th class="p-4 pr-5">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#EEEEF4] text-[#151C27]">
+                <tr class="hover:bg-[#F9FAFB]/60">
+                  <td class="p-4 pl-5"><span class="font-mono font-bold px-2 py-0.5 bg-red-50 text-red-600 border border-red-200 rounded-md">401</span></td>
+                  <td class="p-4 font-mono text-[#64748B]">Partner.Unauthorized</td>
+                  <td class="p-4">Invalid ApiKey or ApiSecret</td>
+                  <td class="p-4 pr-5 text-[#64748B]">Check credentials in Integration settings</td>
+                </tr>
+                <tr class="hover:bg-[#F9FAFB]/60">
+                  <td class="p-4 pl-5"><span class="font-mono font-bold px-2 py-0.5 bg-red-50 text-red-600 border border-red-200 rounded-md">400</span></td>
+                  <td class="p-4 font-mono text-[#64748B]">Coupon.InvalidCode</td>
+                  <td class="p-4">Request missing the <code class="bg-gray-100 px-1 rounded">code</code> field</td>
+                  <td class="p-4 pr-5 text-[#64748B]">Ensure body includes <code class="font-mono">"code"</code></td>
+                </tr>
+                <tr class="hover:bg-[#F9FAFB]/60">
+                  <td class="p-4 pl-5"><span class="font-mono font-bold px-2 py-0.5 bg-red-50 text-red-600 border border-red-200 rounded-md">404</span></td>
+                  <td class="p-4 font-mono text-[#64748B]">Coupon.NotFound</td>
+                  <td class="p-4">Code not found or wrong partner</td>
+                  <td class="p-4 pr-5 text-[#64748B]">Verify the coupon belongs to your store</td>
+                </tr>
+                <tr class="hover:bg-[#F9FAFB]/60">
+                  <td class="p-4 pl-5"><span class="font-mono font-bold px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-md">409</span></td>
+                  <td class="p-4 font-mono text-[#64748B]">Coupon.AlreadyRedeemed</td>
+                  <td class="p-4">Coupon was already used</td>
+                  <td class="p-4 pr-5 text-[#64748B]">Do <strong>not</strong> apply discount</td>
+                </tr>
+                <tr class="hover:bg-[#F9FAFB]/60">
+                  <td class="p-4 pl-5"><span class="font-mono font-bold px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-md">409</span></td>
+                  <td class="p-4 font-mono text-[#64748B]">Coupon.Cancelled</td>
+                  <td class="p-4">Coupon was cancelled by user</td>
+                  <td class="p-4 pr-5 text-[#64748B]">Inform user — coupon invalid</td>
+                </tr>
+                <tr class="hover:bg-[#F9FAFB]/60">
+                  <td class="p-4 pl-5"><span class="font-mono font-bold px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-md">410</span></td>
+                  <td class="p-4 font-mono text-[#64748B]">Coupon.Expired</td>
+                  <td class="p-4">Coupon passed its expiry date</td>
+                  <td class="p-4 pr-5 text-[#64748B]">Inform user — coupon expired</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+
+        <!-- ════════════════════════════════════════════════════════════════
+             SECTION 4 — Webhooks / Postbacks
+        ════════════════════════════════════════════════════════════════ -->
+        <section id="section-webhook" class="section-anchor space-y-5">
+          <div class="flex items-center gap-3 pb-2 border-b border-[#EEEEF4]">
+            <div class="p-1.5 bg-orange-50 rounded-lg">
+              <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <h2 class="font-sora font-bold text-xl text-[#151C27]">Webhooks (Postbacks)</h2>
+          </div>
+
+          <p class="text-sm text-[#64748B] leading-relaxed">
+            When a user completes an offer, Nexus sends a real-time <strong>server-to-server postback</strong> to your configured endpoint with the conversion details.
+          </p>
+
+          <!-- Postback parameters table -->
+          <div class="rounded-2xl border border-[#EEEEF4] overflow-hidden">
+            <div class="p-4 pl-5 border-b border-[#EEEEF4] bg-[#F9FAFB]">
+              <h3 class="text-xs font-bold text-[#151C27] uppercase tracking-wider">Postback Parameters</h3>
+            </div>
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-[#F9FAFB]/50 text-[#64748B] font-semibold border-b border-[#EEEEF4]">
+                  <th class="p-4 pl-5">Parameter</th>
+                  <th class="p-4">Type</th>
+                  <th class="p-4 pr-5">Description</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#EEEEF4] text-[#151C27]">
+                <tr class="hover:bg-[#F9FAFB]/60"><td class="p-4 pl-5 font-mono font-bold text-purple-700">offer_id</td><td class="p-4 text-[#64748B]">string</td><td class="p-4 pr-5">Unique identifier of the completed offer</td></tr>
+                <tr class="hover:bg-[#F9FAFB]/60"><td class="p-4 pl-5 font-mono font-bold text-purple-700">user_id</td><td class="p-4 text-[#64748B]">string</td><td class="p-4 pr-5">Your end-user identifier</td></tr>
+                <tr class="hover:bg-[#F9FAFB]/60"><td class="p-4 pl-5 font-mono font-bold text-purple-700">amount</td><td class="p-4 text-[#64748B]">decimal</td><td class="p-4 pr-5">USD value of the conversion</td></tr>
+                <tr class="hover:bg-[#F9FAFB]/60"><td class="p-4 pl-5 font-mono font-bold text-purple-700">currency</td><td class="p-4 text-[#64748B]">string</td><td class="p-4 pr-5">Always <code class="font-mono bg-gray-100 px-1 rounded">USD</code></td></tr>
+                <tr class="hover:bg-[#F9FAFB]/60"><td class="p-4 pl-5 font-mono font-bold text-purple-700">transaction_id</td><td class="p-4 text-[#64748B]">string</td><td class="p-4 pr-5">Unique transaction ID (use for dedup)</td></tr>
+                <tr class="hover:bg-[#F9FAFB]/60"><td class="p-4 pl-5 font-mono font-bold text-purple-700">status</td><td class="p-4 text-[#64748B]">string</td><td class="p-4 pr-5"><code class="font-mono">completed</code> or <code class="font-mono">chargeback</code></td></tr>
+                <tr class="hover:bg-[#F9FAFB]/60"><td class="p-4 pl-5 font-mono font-bold text-purple-700">timestamp</td><td class="p-4 text-[#64748B]">ISO 8601</td><td class="p-4 pr-5">UTC time of the event</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- IP Whitelist -->
+          <div class="bg-white border border-[#EEEEF4] rounded-2xl p-5 space-y-3">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#7C3AED] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+              <h3 class="font-semibold text-sm text-[#151C27]">IP Whitelist — Nexus Server IPs</h3>
+            </div>
+            <p class="text-xs text-[#64748B]">Reject any postback not originating from these IPs.</p>
+            <div class="flex flex-wrap gap-2">
+              <span *ngFor="let ip of WEBHOOK_IPS"
+                (click)="copy(ip, ip + ' copied!')"
+                class="font-mono text-xs px-3 py-1.5 bg-[#F9FAFB] border border-[#EEEEF4] rounded-lg text-[#151C27] cursor-pointer hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700 transition-colors select-all">
+                {{ ip }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Code tabs -->
+          <div class="bg-[#151C27] rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
+            <div class="flex items-center border-b border-gray-700/60 px-2 pt-2 gap-1 overflow-x-auto">
+              <button *ngFor="let lang of langs" (click)="webhookTab = lang"
+                class="px-4 py-2 text-xs font-semibold rounded-t-lg transition-colors relative whitespace-nowrap"
+                [class.bg-gray-800]="webhookTab === lang"
+                [class.text-white]="webhookTab === lang"
+                [class.lang-tab-active]="webhookTab === lang"
+                [class.text-gray-500]="webhookTab !== lang">
+                {{ langLabels[lang] }}
+              </button>
+              <div class="flex-1"></div>
+              <button (click)="copy(webhookSnippets[webhookTab], langLabels[webhookTab] + ' snippet copied!')"
+                class="shrink-0 flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors px-3 py-2 mb-1 rounded-lg hover:bg-gray-700/50">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                Copy
+              </button>
+            </div>
+            <div class="p-5">
+              <pre class="text-emerald-300 font-mono">{{ webhookSnippets[webhookTab] }}</pre>
+            </div>
+          </div>
+
+          <!-- Important note -->
+          <div class="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div class="text-xs text-amber-900 leading-relaxed">
+              <strong>Your endpoint must respond with HTTP 200 OK</strong> within 5 seconds.
+              Failed postbacks are retried up to <strong>3 times</strong> with exponential backoff.
+              Use the <code class="font-mono bg-amber-100 px-1 rounded">transaction_id</code> to deduplicate retries.
+            </div>
+          </div>
+        </section>
+
+        <!-- Bottom spacer -->
+        <div class="h-16"></div>
+      </main>
+    </div>
+
+    <app-publisher-footer></app-publisher-footer>
+  </div>
+</div>

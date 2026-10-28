@@ -1,0 +1,37 @@
+/* Smooth scroll offset for sticky header */
+:host { display: block; }
+
+.section-anchor { scroll-margin-top: 88px; }
+
+/* Code block */
+pre {
+  white-space: pre;
+  overflow-x: auto;
+  font-size: 0.72rem;
+  line-height: 1.65;
+}
+
+/* Sidebar active dot */
+.nav-dot { transition: opacity 0.2s; }
+
+/* Tab slide underline */
+.lang-tab-active {
+  position: relative;
+}
+.lang-tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #7C3AED;
+  border-radius: 2px;
+}
+
+/* Toast slide-in */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.toast-anim { animation: toast-in 0.25s ease; }

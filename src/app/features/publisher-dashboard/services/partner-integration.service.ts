@@ -7,6 +7,7 @@ const API_URL = 'https://winfloos.runasp.net';
 export interface IntegrationResponse {
   publisherId: string;
   apiKey: string;
+  apiSecret: string;
   pointsPerUsd: number;
 }
 
@@ -22,8 +23,9 @@ export interface RegenerateApiKeyResponse {
 export class PartnerIntegrationService {
   private http = inject(HttpClient);
 
+  /** GET /api/partner/integration — requires JWT (Partner role) */
   getIntegration(): Observable<IntegrationResponse> {
-    return this.http.get<IntegrationResponse>(`${API_URL}/partners/integration`);
+    return this.http.get<IntegrationResponse>(`${API_URL}/api/partner/integration`);
   }
 
   updatePointsRate(pointsPerUsd: number): Observable<void> {

@@ -74,6 +74,9 @@ export class IframeIntegrationComponent implements OnInit, OnDestroy {
   step2Complete = false;
   keyCopiedAtLeastOnce = false;
 
+  // API Secret visibility toggle
+  showApiSecret = false;
+
   get completedSteps(): number {
     return (this.step1Complete ? 1 : 0) + (this.step2Complete ? 1 : 0);
   }
@@ -222,8 +225,19 @@ export class IframeIntegrationComponent implements OnInit, OnDestroy {
       this.keyCopiedAtLeastOnce = true;
       this.step1Complete = true;
       localStorage.setItem('nexus_iframe_step1_complete', 'true');
-      this.showToast('API key copied to clipboard', 'success');
+      this.showToast('API Key copied to clipboard', 'success');
     });
+  }
+
+  copyApiSecret(): void {
+    if (!this.integrationData?.apiSecret) return;
+    navigator.clipboard.writeText(this.integrationData.apiSecret).then(() => {
+      this.showToast('API Secret copied to clipboard — keep it secure!', 'success');
+    });
+  }
+
+  toggleApiSecretVisibility(): void {
+    this.showApiSecret = !this.showApiSecret;
   }
 
   copyOfferWallUrl(): void {
